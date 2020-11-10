@@ -15,6 +15,12 @@ publish = false
 [package.metadata.docs.rs]
 all-features = true
 
+[features]
+default = ["std"]
+
+alloc = []
+std = ["alloc"]
+
 [dependencies]
 
 [badges]
