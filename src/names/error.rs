@@ -60,6 +60,10 @@ pub(super) enum TargetNameType {
     ///
     /// [`NCName`]: https://www.w3.org/TR/2009/REC-xml-names-20091208/#NT-NCName
     Ncname,
+    /// [`Nmtoken`].
+    ///
+    /// [`Nmtoken`]: https://www.w3.org/TR/REC-xml/#NT-Nmtoken
+    Nmtoken,
     /// [`QName`].
     ///
     /// [`QName`]: https://www.w3.org/TR/2009/REC-xml-names-20091208/#NT-QName
@@ -72,6 +76,7 @@ impl TargetNameType {
         match self {
             Self::Name => "Name",
             Self::Ncname => "NCName",
+            Self::Nmtoken => "Nmtoken",
             Self::Qname => "QName",
         }
     }

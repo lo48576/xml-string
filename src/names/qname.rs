@@ -6,7 +6,7 @@ use core::convert::TryFrom;
 use core::num::NonZeroUsize;
 
 use crate::names::error::{NameError, TargetNameType};
-use crate::names::{NameStr, NcnameStr};
+use crate::names::{NameStr, NcnameStr, NmtokenStr};
 
 /// String slice for [`QName`].
 ///
@@ -265,6 +265,21 @@ impl AsRef<NameStr> for QnameStr {
             );
             // This is safe because a QName is also a valid NCName.
             NameStr::new_unchecked(self.as_str())
+        }
+    }
+}
+
+impl AsRef<NmtokenStr> for QnameStr {
+    #[inline]
+    fn as_ref(&self) -> &NmtokenStr {
+        unsafe {
+            debug_assert!(
+                NmtokenStr::from_str(self.as_str()).is_ok(),
+                "QName {:?} must be a valid Nmtoken",
+                self.as_str()
+            );
+            // This is safe because a QName is also a valid Nmtoken.
+            NmtokenStr::new_unchecked(self.as_str())
         }
     }
 }

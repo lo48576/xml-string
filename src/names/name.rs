@@ -6,7 +6,7 @@ use core::convert::TryFrom;
 
 use crate::names::chars;
 use crate::names::error::{NameError, TargetNameType};
-use crate::names::{NcnameStr, QnameStr};
+use crate::names::{NcnameStr, NmtokenStr, QnameStr};
 
 /// String slice for [`Name`].
 ///
@@ -104,6 +104,21 @@ impl NameStr {
 
 impl_traits_for_custom_string_slice!(NameStr);
 
+impl AsRef<NmtokenStr> for NameStr {
+    #[inline]
+    fn as_ref(&self) -> &NmtokenStr {
+        unsafe {
+            debug_assert!(
+                NmtokenStr::from_str(self.as_str()).is_ok(),
+                "Name {:?} must be a valid Nmtoken",
+                self.as_str()
+            );
+            // This is safe because a Name is also a valid Nmtoken.
+            NmtokenStr::new_unchecked(self.as_str())
+        }
+    }
+}
+
 impl<'a> From<&'a NcnameStr> for &'a NameStr {
     #[inline]
     fn from(s: &'a NcnameStr) -> Self {
@@ -126,6 +141,27 @@ impl<'a> TryFrom<&'a str> for &'a NameStr {
         Ok(unsafe {
             // This is safe because the string is validated.
             NameStr::new_unchecked(s)
+        })
+    }
+}
+
+impl<'a> TryFrom<&'a NmtokenStr> for &'a NameStr {
+    type Error = NameError;
+
+    fn try_from(s: &'a NmtokenStr) -> Result<Self, Self::Error> {
+        let first = s
+            .as_str()
+            .chars()
+            .next()
+            .expect("Should never fail: Nmtoken is not empty");
+        if !chars::is_name_start(first) {
+            return Err(NameError::new(TargetNameType::Name, 0));
+        }
+
+        Ok(unsafe {
+            // This is safe because a Nmtoken starting with NameStartChar is also a valid Name.
+            debug_assert!(NameStr::validate(s.as_str()).is_ok());
+            NameStr::new_unchecked(s.as_str())
         })
     }
 }
