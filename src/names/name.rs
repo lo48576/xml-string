@@ -6,7 +6,7 @@ use core::convert::TryFrom;
 
 use crate::names::chars;
 use crate::names::error::{NameError, TargetNameType};
-use crate::names::NcnameStr;
+use crate::names::{NcnameStr, QnameStr};
 
 /// String slice for [`Name`].
 ///
@@ -107,6 +107,13 @@ impl_traits_for_custom_string_slice!(NameStr);
 impl<'a> From<&'a NcnameStr> for &'a NameStr {
     #[inline]
     fn from(s: &'a NcnameStr) -> Self {
+        s.as_ref()
+    }
+}
+
+impl<'a> From<&'a QnameStr> for &'a NameStr {
+    #[inline]
+    fn from(s: &'a QnameStr) -> Self {
         s.as_ref()
     }
 }

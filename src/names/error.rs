@@ -60,6 +60,10 @@ pub(super) enum TargetNameType {
     ///
     /// [`NCName`]: https://www.w3.org/TR/2009/REC-xml-names-20091208/#NT-NCName
     Ncname,
+    /// [`QName`].
+    ///
+    /// [`QName`]: https://www.w3.org/TR/2009/REC-xml-names-20091208/#NT-QName
+    Qname,
 }
 
 impl TargetNameType {
@@ -68,6 +72,7 @@ impl TargetNameType {
         match self {
             Self::Name => "Name",
             Self::Ncname => "NCName",
+            Self::Qname => "QName",
         }
     }
 }

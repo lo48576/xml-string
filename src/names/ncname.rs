@@ -6,7 +6,7 @@ use core::convert::TryFrom;
 
 use crate::names::chars;
 use crate::names::error::{NameError, TargetNameType};
-use crate::names::NameStr;
+use crate::names::{NameStr, QnameStr};
 
 /// String slice for [`NCName`].
 ///
@@ -118,6 +118,19 @@ impl AsRef<NameStr> for NcnameStr {
                 "An NCName is also a Name"
             );
             NameStr::new_unchecked(self.as_str())
+        }
+    }
+}
+
+impl AsRef<QnameStr> for NcnameStr {
+    #[inline]
+    fn as_ref(&self) -> &QnameStr {
+        unsafe {
+            debug_assert!(
+                QnameStr::from_str(self.as_str()).is_ok(),
+                "An NCName is also a Qname"
+            );
+            QnameStr::new_unchecked(self.as_str())
         }
     }
 }
