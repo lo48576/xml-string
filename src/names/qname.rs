@@ -140,6 +140,30 @@ impl QnameStr {
         self.as_str().find(':').and_then(NonZeroUsize::new)
     }
 
+    /// Returns whether the QName has a prefix.
+    ///
+    /// Note that this is O(length) operation.
+    /// Consider using [`QnameRef::has_prefix`] method if possible.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use xml_string::names::QnameStr;
+    /// let local_only = QnameStr::from_str("hello")?;
+    /// assert!(!local_only.has_prefix());
+    ///
+    /// let prefixed = QnameStr::from_str("foo:bar")?;
+    /// assert!(prefixed.has_prefix());
+    /// # Ok::<_, xml_string::names::NameError>(())
+    /// ```
+    ///
+    /// [`QnameRef::has_prefix`]: struct.QnameRef.html#method.has_prefix
+    #[inline]
+    #[must_use]
+    pub fn has_prefix(&self) -> bool {
+        self.as_str().find(':').is_some()
+    }
+
     /// Returns the prefix if available.
     ///
     /// Note that this is O(length) operation.
@@ -373,6 +397,25 @@ impl<'a> QnameRef<'a> {
     #[must_use]
     pub fn as_str(&self) -> &'a str {
         self.content.as_str()
+    }
+
+    /// Returns whether the QName has a prefix.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use xml_string::names::QnameRef;
+    /// let local_only = QnameRef::from_str("hello")?;
+    /// assert!(!local_only.has_prefix());
+    ///
+    /// let prefixed = QnameRef::from_str("foo:bar")?;
+    /// assert!(prefixed.has_prefix());
+    /// # Ok::<_, xml_string::names::NameError>(())
+    /// ```
+    #[inline]
+    #[must_use]
+    pub fn has_prefix(&self) -> bool {
+        self.prefix_len.is_some()
     }
 
     /// Returns the prefix, if available.
