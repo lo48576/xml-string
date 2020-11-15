@@ -11,4 +11,4 @@ pub use self::error::NameError;
 pub use self::name::NameStr;
 pub use self::ncname::NcnameStr;
 pub use self::nmtoken::NmtokenStr;
-pub use self::qname::QnameStr;
+pub use self::qname::{QnameRef, QnameStr};
