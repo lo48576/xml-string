@@ -386,6 +386,20 @@ impl<'a> QnameRef<'a> {
     }
 
     /// Returns the string as `&QnameStr`.
+    ///
+    /// # Exmaples
+    ///
+    /// ```
+    /// # use xml_string::names::QnameRef;
+    /// use xml_string::names::QnameStr;
+    ///
+    /// let name = QnameRef::from_str("hello")?;
+    /// assert_eq!(name, "hello");
+    ///
+    /// let s: &QnameStr = name.as_qname_str();
+    /// assert_eq!(s, "hello");
+    /// # Ok::<_, xml_string::names::NameError>(())
+    /// ```
     #[inline]
     #[must_use]
     pub fn as_qname_str(&self) -> &'a QnameStr {
@@ -393,6 +407,18 @@ impl<'a> QnameRef<'a> {
     }
 
     /// Returns the string as `&str`.
+    ///
+    /// # Exmaples
+    ///
+    /// ```
+    /// # use xml_string::names::QnameRef;
+    /// let name = QnameRef::from_str("hello")?;
+    /// assert_eq!(name, "hello");
+    ///
+    /// let s: &str = name.as_str();
+    /// assert_eq!(s, "hello");
+    /// # Ok::<_, xml_string::names::NameError>(())
+    /// ```
     #[inline]
     #[must_use]
     pub fn as_str(&self) -> &'a str {
@@ -419,6 +445,18 @@ impl<'a> QnameRef<'a> {
     }
 
     /// Returns the prefix, if available.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use xml_string::names::QnameRef;
+    /// let prefixed = QnameRef::from_str("foo:bar")?;
+    /// assert_eq!(prefixed.prefix().map(|s| s.as_str()), Some("foo"));
+    ///
+    /// let noprefix = QnameRef::from_str("foo")?;
+    /// assert_eq!(noprefix.prefix().map(|s| s.as_str()), None);
+    /// # Ok::<_, xml_string::names::NameError>(())
+    /// ```
     #[must_use]
     pub fn prefix(&self) -> Option<&'a NcnameStr> {
         self.prefix_len.as_ref().map(|p_len| {
@@ -436,6 +474,18 @@ impl<'a> QnameRef<'a> {
     }
 
     /// Returns the local part.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use xml_string::names::QnameRef;
+    /// let prefixed = QnameRef::from_str("foo:bar")?;
+    /// assert_eq!(prefixed.local_part(), "bar");
+    ///
+    /// let noprefix = QnameRef::from_str("foo")?;
+    /// assert_eq!(noprefix.local_part(), "foo");
+    /// # Ok::<_, xml_string::names::NameError>(())
+    /// ```
     #[must_use]
     pub fn local_part(&self) -> &'a NcnameStr {
         let start = self.prefix_len.as_ref().map_or(0, |p_len| p_len.get() + 1);
@@ -461,10 +511,10 @@ impl<'a> QnameRef<'a> {
     /// # use xml_string::names::QnameRef;
     /// use std::convert::TryFrom;
     ///
-    /// let noprefix = QnameRef::try_from("hello")?;
+    /// let noprefix = QnameRef::from_str("hello")?;
     /// assert_eq!(noprefix.prefix_and_local(), (noprefix.prefix(), noprefix.local_part()));
     ///
-    /// let prefixed = QnameRef::try_from("hello")?;
+    /// let prefixed = QnameRef::from_str("foo:bar")?;
     /// assert_eq!(prefixed.prefix_and_local(), (prefixed.prefix(), prefixed.local_part()));
     /// # Ok::<_, xml_string::names::NameError>(())
     /// ```

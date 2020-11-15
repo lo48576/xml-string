@@ -27,6 +27,24 @@ impl NameError {
     /// Note that `&source_str[..err.valid_up_to()]` might be invalid when `valid_up_to` is zero.
     /// In other words, it depends on target type whether the empty string is valid or not.
     /// This error type does not assume anything about it.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use xml_string::names::NameError;
+    /// use xml_string::names::NcnameStr;
+    ///
+    /// let err_nonempty = NcnameStr::from_str("foo:bar").expect_err("NCName cannot have a colon");
+    /// assert_eq!(err_nonempty.valid_up_to(), 3);
+    /// assert!(NcnameStr::from_str("foo").is_ok());
+    ///
+    /// let err_empty = NcnameStr::from_str("").expect_err("NCName cannot be empty");
+    /// assert_eq!(err_empty.valid_up_to(), 0);
+    /// assert!(
+    ///     NcnameStr::from_str("").is_err(),
+    ///     "Note that `&s[..err.valid_up_to()]` is not always valid for the empty source string"
+    /// );
+    /// ```
     #[inline]
     #[must_use]
     pub fn valid_up_to(&self) -> usize {
