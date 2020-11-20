@@ -1,7 +1,7 @@
 # xml-string
 
 [![Build Status](https://gitlab.com/lo48576/xml-string/badges/develop/pipeline.svg)](https://gitlab.com/lo48576/xml-string/pipelines/)
-![Minimum supported rustc version: 1.47](https://img.shields.io/badge/rustc-1.47+-lightgray.svg)
+![Minimum supported rustc version: 1.48](https://img.shields.io/badge/rustc-1.48+-lightgray.svg)
 
 String types for XML.
 
