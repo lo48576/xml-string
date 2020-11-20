@@ -100,6 +100,44 @@ impl NameStr {
     pub fn as_str(&self) -> &str {
         &self.0
     }
+
+    /// Parses the leading `NameStr` and returns the value and the rest input.
+    ///
+    /// # Exmaples
+    ///
+    /// ```
+    /// # use xml_string::names::NameStr;
+    /// let input = "hello, world";
+    /// let expected = NameStr::from_str("hello").expect("valid Name");
+    /// assert_eq!(
+    ///     NameStr::parse_next(input),
+    ///     Ok((expected, ", world"))
+    /// );
+    /// # Ok::<_, xml_string::names::NameError>(())
+    /// ```
+    ///
+    /// ```
+    /// # use xml_string::names::NameStr;
+    /// let input = "012";
+    /// assert!(NameStr::parse_next(input).is_err());
+    /// # Ok::<_, xml_string::names::NameError>(())
+    /// ```
+    pub fn parse_next(s: &str) -> Result<(&Self, &str), NameError> {
+        match Self::from_str(s) {
+            Ok(v) => Ok((v, &s[s.len()..])),
+            Err(e) if e.valid_up_to() == 0 => Err(e),
+            Err(e) => {
+                let valid_up_to = e.valid_up_to();
+                let v = unsafe {
+                    let valid = &s[..valid_up_to];
+                    debug_assert!(Self::validate(valid).is_ok());
+                    // This is safe because the substring is valid.
+                    Self::new_unchecked(valid)
+                };
+                Ok((v, &s[valid_up_to..]))
+            }
+        }
+    }
 }
 
 impl_traits_for_custom_string_slice!(NameStr);

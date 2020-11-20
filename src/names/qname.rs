@@ -132,6 +132,55 @@ impl QnameStr {
         &self.0
     }
 
+    /// Parses the leading `QameStr` and returns the value and the rest input.
+    ///
+    /// # Exmaples
+    ///
+    /// ```
+    /// # use xml_string::names::QnameStr;
+    /// let input = "hello:012";
+    /// let expected = QnameStr::from_str("hello").expect("valid Qname");
+    /// assert_eq!(
+    ///     QnameStr::parse_next(input),
+    ///     Ok((expected, ":012"))
+    /// );
+    /// # Ok::<_, xml_string::names::NameError>(())
+    /// ```
+    ///
+    /// ```
+    /// # use xml_string::names::QnameStr;
+    /// let input = "hello:world:foo";
+    /// let expected = QnameStr::from_str("hello:world").expect("valid Qname");
+    /// assert_eq!(
+    ///     QnameStr::parse_next(input),
+    ///     Ok((expected, ":foo"))
+    /// );
+    /// # Ok::<_, xml_string::names::NameError>(())
+    /// ```
+    ///
+    /// ```
+    /// # use xml_string::names::QnameStr;
+    /// let input = "012";
+    /// assert!(QnameStr::parse_next(input).is_err());
+    /// # Ok::<_, xml_string::names::NameError>(())
+    /// ```
+    pub fn parse_next(s: &str) -> Result<(&Self, &str), NameError> {
+        match Self::from_str(s) {
+            Ok(v) => Ok((v, &s[s.len()..])),
+            Err(e) if e.valid_up_to() == 0 => Err(e),
+            Err(e) => {
+                let valid_up_to = e.valid_up_to();
+                let v = unsafe {
+                    let valid = &s[..valid_up_to];
+                    debug_assert!(Self::validate(valid).is_ok());
+                    // This is safe because the substring is valid.
+                    Self::new_unchecked(valid)
+                };
+                Ok((v, &s[valid_up_to..]))
+            }
+        }
+    }
+
     /// Returns the length of the prefix, if available.
     ///
     /// Note that this is O(length) operation.
