@@ -205,8 +205,6 @@ impl QnameStr {
     /// assert!(prefixed.has_prefix());
     /// # Ok::<_, xml_string::names::NameError>(())
     /// ```
-    ///
-    /// [`QnameRef::has_prefix`]: struct.QnameRef.html#method.has_prefix
     #[inline]
     #[must_use]
     pub fn has_prefix(&self) -> bool {
@@ -229,8 +227,6 @@ impl QnameStr {
     /// assert_eq!(noprefix.prefix().map(|s| s.as_str()), None);
     /// # Ok::<_, xml_string::names::NameError>(())
     /// ```
-    ///
-    /// [`QnameRef::prefix`]: struct.QnameRef.html#method.prefix
     #[inline]
     #[must_use]
     pub fn prefix(&self) -> Option<&NcnameStr> {
@@ -253,8 +249,6 @@ impl QnameStr {
     /// assert_eq!(noprefix.local_part(), "foo");
     /// # Ok::<_, xml_string::names::NameError>(())
     /// ```
-    ///
-    /// [`QnameRef::local_part`]: struct.QnameRef.html#method.local_part
     #[inline]
     #[must_use]
     pub fn local_part(&self) -> &NcnameStr {
@@ -279,8 +273,6 @@ impl QnameStr {
     /// assert_eq!(prefixed.prefix_and_local(), (prefixed.prefix(), prefixed.local_part()));
     /// # Ok::<_, xml_string::names::NameError>(())
     /// ```
-    ///
-    /// [`QnameRef::prefix_and_local`]: struct.QnameRef.html#method.prefix_and_local
     #[inline]
     #[must_use]
     pub fn prefix_and_local(&self) -> (Option<&NcnameStr>, &NcnameStr) {
