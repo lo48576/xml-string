@@ -3,6 +3,7 @@
 //! [`QName`]: https://www.w3.org/TR/2009/REC-xml-names-20091208/#NT-QName
 
 use core::convert::TryFrom;
+use core::fmt;
 use core::num::NonZeroUsize;
 
 use crate::names::error::{NameError, TargetNameType};
@@ -711,6 +712,13 @@ impl<'a> TryFrom<&'a str> for ParsedQname<'a> {
                 Err(NameError::new(TargetNameType::Qname, valid_up_to))
             }
         }
+    }
+}
+
+impl fmt::Display for ParsedQname<'_> {
+    #[inline]
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.write_str(self.as_str())
     }
 }
 

@@ -57,5 +57,12 @@ macro_rules! impl_traits_for_custom_string_slice {
                 &(**self).0
             }
         }
+
+        impl core::fmt::Display for &$custom_str {
+            #[inline]
+            fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+                f.write_str(self.as_ref())
+            }
+        }
     };
 }
