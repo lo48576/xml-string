@@ -11,7 +11,7 @@ use crate::names::{Name, Nmtoken, Qname};
 /// String slice for [`NCName`].
 ///
 /// [`NCName`]: https://www.w3.org/TR/2009/REC-xml-names-20091208/#NT-NCName
-#[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[repr(transparent)]
 pub struct Ncname(str);
 
