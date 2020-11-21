@@ -32,16 +32,16 @@ impl NameError {
     ///
     /// ```
     /// # use xml_string::names::NameError;
-    /// use xml_string::names::NcnameStr;
+    /// use xml_string::names::Ncname;
     ///
-    /// let err_nonempty = NcnameStr::from_str("foo:bar").expect_err("NCName cannot have a colon");
+    /// let err_nonempty = Ncname::from_str("foo:bar").expect_err("NCName cannot have a colon");
     /// assert_eq!(err_nonempty.valid_up_to(), 3);
-    /// assert!(NcnameStr::from_str("foo").is_ok());
+    /// assert!(Ncname::from_str("foo").is_ok());
     ///
-    /// let err_empty = NcnameStr::from_str("").expect_err("NCName cannot be empty");
+    /// let err_empty = Ncname::from_str("").expect_err("NCName cannot be empty");
     /// assert_eq!(err_empty.valid_up_to(), 0);
     /// assert!(
-    ///     NcnameStr::from_str("").is_err(),
+    ///     Ncname::from_str("").is_err(),
     ///     "Note that `&s[..err.valid_up_to()]` is not always valid for the empty source string"
     /// );
     /// ```

@@ -6,17 +6,17 @@ use core::convert::TryFrom;
 
 use crate::names::chars;
 use crate::names::error::{NameError, TargetNameType};
-use crate::names::{NameStr, NmtokenStr, QnameStr};
+use crate::names::{Name, Nmtoken, Qname};
 
 /// String slice for [`NCName`].
 ///
 /// [`NCName`]: https://www.w3.org/TR/2009/REC-xml-names-20091208/#NT-NCName
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[repr(transparent)]
-pub struct NcnameStr(str);
+pub struct Ncname(str);
 
-impl NcnameStr {
-    /// Creates a new `&NcnameStr`.
+impl Ncname {
+    /// Creates a new `&Ncname`.
     ///
     /// # Failures
     ///
@@ -25,14 +25,14 @@ impl NcnameStr {
     /// # Examples
     ///
     /// ```
-    /// # use xml_string::names::NcnameStr;
-    /// let name = NcnameStr::from_str("hello")?;
+    /// # use xml_string::names::Ncname;
+    /// let name = Ncname::from_str("hello")?;
     /// assert_eq!(name, "hello");
     ///
-    /// assert!(NcnameStr::from_str("").is_err(), "Empty string is not an NCName");
-    /// assert!(NcnameStr::from_str("foo bar").is_err(), "Whitespace is not allowed");
-    /// assert!(NcnameStr::from_str("foo:bar").is_err(), "Colon is not allowed");
-    /// assert!(NcnameStr::from_str("0foo").is_err(), "ASCII digit at the beginning is not allowed");
+    /// assert!(Ncname::from_str("").is_err(), "Empty string is not an NCName");
+    /// assert!(Ncname::from_str("foo bar").is_err(), "Whitespace is not allowed");
+    /// assert!(Ncname::from_str("foo:bar").is_err(), "Colon is not allowed");
+    /// assert!(Ncname::from_str("0foo").is_err(), "ASCII digit at the beginning is not allowed");
     /// # Ok::<_, xml_string::names::NameError>(())
     /// ```
     ///
@@ -44,7 +44,7 @@ impl NcnameStr {
         <&Self>::try_from(s)
     }
 
-    /// Creates a new `&NcnameStr` without validation.
+    /// Creates a new `&Ncname` without validation.
     ///
     /// # Safety
     ///
@@ -53,9 +53,9 @@ impl NcnameStr {
     /// # Examples
     ///
     /// ```
-    /// # use xml_string::names::NcnameStr;
+    /// # use xml_string::names::Ncname;
     /// let name = unsafe {
-    ///     NcnameStr::new_unchecked("hello")
+    ///     Ncname::new_unchecked("hello")
     /// };
     /// assert_eq!(name, "hello");
     /// ```
@@ -92,8 +92,8 @@ impl NcnameStr {
     /// # Examples
     ///
     /// ```
-    /// # use xml_string::names::NcnameStr;
-    /// let name = NcnameStr::from_str("hello")?;
+    /// # use xml_string::names::Ncname;
+    /// let name = Ncname::from_str("hello")?;
     /// assert_eq!(name, "hello");
     ///
     /// let s: &str = name.as_str();
@@ -106,25 +106,25 @@ impl NcnameStr {
         &self.0
     }
 
-    /// Parses the leading `NcnameStr` and returns the value and the rest input.
+    /// Parses the leading `Ncname` and returns the value and the rest input.
     ///
     /// # Exmaples
     ///
     /// ```
-    /// # use xml_string::names::NcnameStr;
+    /// # use xml_string::names::Ncname;
     /// let input = "hello:world";
-    /// let expected = NcnameStr::from_str("hello").expect("valid NCName");
+    /// let expected = Ncname::from_str("hello").expect("valid NCName");
     /// assert_eq!(
-    ///     NcnameStr::parse_next(input),
+    ///     Ncname::parse_next(input),
     ///     Ok((expected, ":world"))
     /// );
     /// # Ok::<_, xml_string::names::NameError>(())
     /// ```
     ///
     /// ```
-    /// # use xml_string::names::NcnameStr;
+    /// # use xml_string::names::Ncname;
     /// let input = "012";
-    /// assert!(NcnameStr::parse_next(input).is_err());
+    /// assert!(Ncname::parse_next(input).is_err());
     /// # Ok::<_, xml_string::names::NameError>(())
     /// ```
     pub fn parse_next(s: &str) -> Result<(&Self, &str), NameError> {
@@ -145,76 +145,76 @@ impl NcnameStr {
     }
 }
 
-impl_traits_for_custom_string_slice!(NcnameStr);
+impl_traits_for_custom_string_slice!(Ncname);
 
-impl AsRef<NmtokenStr> for NcnameStr {
+impl AsRef<Nmtoken> for Ncname {
     #[inline]
-    fn as_ref(&self) -> &NmtokenStr {
+    fn as_ref(&self) -> &Nmtoken {
         unsafe {
             debug_assert!(
-                NmtokenStr::from_str(self.as_str()).is_ok(),
+                Nmtoken::from_str(self.as_str()).is_ok(),
                 "NCName {:?} must be a valid Nmtoken",
                 self.as_str()
             );
             // This is safe because an NCName is also a valid Nmtoken.
-            NmtokenStr::new_unchecked(self.as_str())
+            Nmtoken::new_unchecked(self.as_str())
         }
     }
 }
 
-impl AsRef<NameStr> for NcnameStr {
+impl AsRef<Name> for Ncname {
     #[inline]
-    fn as_ref(&self) -> &NameStr {
+    fn as_ref(&self) -> &Name {
         unsafe {
             debug_assert!(
-                NameStr::from_str(self.as_str()).is_ok(),
+                Name::from_str(self.as_str()).is_ok(),
                 "An NCName is also a Name"
             );
-            NameStr::new_unchecked(self.as_str())
+            Name::new_unchecked(self.as_str())
         }
     }
 }
 
-impl AsRef<QnameStr> for NcnameStr {
+impl AsRef<Qname> for Ncname {
     #[inline]
-    fn as_ref(&self) -> &QnameStr {
+    fn as_ref(&self) -> &Qname {
         unsafe {
             debug_assert!(
-                QnameStr::from_str(self.as_str()).is_ok(),
+                Qname::from_str(self.as_str()).is_ok(),
                 "An NCName is also a Qname"
             );
-            QnameStr::new_unchecked(self.as_str())
+            Qname::new_unchecked(self.as_str())
         }
     }
 }
 
-impl<'a> TryFrom<&'a str> for &'a NcnameStr {
+impl<'a> TryFrom<&'a str> for &'a Ncname {
     type Error = NameError;
 
     fn try_from(s: &'a str) -> Result<Self, Self::Error> {
-        NcnameStr::validate(s)?;
+        Ncname::validate(s)?;
         Ok(unsafe {
             // This is safe because the string is validated.
-            NcnameStr::new_unchecked(s)
+            Ncname::new_unchecked(s)
         })
     }
 }
 
-impl<'a> TryFrom<&'a NameStr> for &'a NcnameStr {
+impl<'a> TryFrom<&'a Name> for &'a Ncname {
     type Error = NameError;
 
-    fn try_from(s: &'a NameStr) -> Result<Self, Self::Error> {
+    fn try_from(s: &'a Name) -> Result<Self, Self::Error> {
         if let Some(colon_pos) = s.as_str().find(':') {
             return Err(NameError::new(TargetNameType::Ncname, colon_pos));
         }
 
         unsafe {
             debug_assert!(
-                NcnameStr::validate(s.as_str()).is_ok(),
+                Ncname::validate(s.as_str()).is_ok(),
                 "Name {:?} without colons is also a valid NCName",
                 s.as_str()
             );
-            Ok(NcnameStr::new_unchecked(s.as_str()))
+            Ok(Ncname::new_unchecked(s.as_str()))
         }
     }
 }
@@ -225,7 +225,7 @@ mod tests {
 
     fn ensure_eq(s: &str) {
         assert_eq!(
-            NcnameStr::from_str(s).expect("Should not fail"),
+            Ncname::from_str(s).expect("Should not fail"),
             s,
             "String: {:?}",
             s
@@ -233,7 +233,7 @@ mod tests {
     }
 
     fn ensure_error_at(s: &str, valid_up_to: usize) {
-        let err = NcnameStr::from_str(s).expect_err("Should fail");
+        let err = Ncname::from_str(s).expect_err("Should fail");
         assert_eq!(err.valid_up_to(), valid_up_to, "String: {:?}", s);
     }
 

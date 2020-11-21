@@ -6,17 +6,17 @@ use core::convert::TryFrom;
 
 use crate::names::chars;
 use crate::names::error::{NameError, TargetNameType};
-use crate::names::{NameStr, NcnameStr, QnameStr};
+use crate::names::{Name, Ncname, Qname};
 
 /// String slice for [`Nmtoken`].
 ///
 /// [`Nmtoken`]: https://www.w3.org/TR/2008/REC-xml-20081126/#NT-Nmtoken
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[repr(transparent)]
-pub struct NmtokenStr(str);
+pub struct Nmtoken(str);
 
-impl NmtokenStr {
-    /// Creates a new `&NmtokenStr`.
+impl Nmtoken {
+    /// Creates a new `&Nmtoken`.
     ///
     /// # Failures
     ///
@@ -25,12 +25,12 @@ impl NmtokenStr {
     /// # Examples
     ///
     /// ```
-    /// # use xml_string::names::NmtokenStr;
-    /// assert_eq!(NmtokenStr::from_str("hello")?, "hello");
-    /// assert_eq!(NmtokenStr::from_str("012")?, "012");
+    /// # use xml_string::names::Nmtoken;
+    /// assert_eq!(Nmtoken::from_str("hello")?, "hello");
+    /// assert_eq!(Nmtoken::from_str("012")?, "012");
     ///
-    /// assert!(NmtokenStr::from_str("").is_err(), "Empty string is not an Nmtoken");
-    /// assert!(NmtokenStr::from_str("foo bar").is_err(), "Whitespace is not allowed");
+    /// assert!(Nmtoken::from_str("").is_err(), "Empty string is not an Nmtoken");
+    /// assert!(Nmtoken::from_str("foo bar").is_err(), "Whitespace is not allowed");
     /// # Ok::<_, xml_string::names::NameError>(())
     /// ```
     ///
@@ -42,7 +42,7 @@ impl NmtokenStr {
         <&Self>::try_from(s)
     }
 
-    /// Creates a new `&NmtokenStr` without validation.
+    /// Creates a new `&Nmtoken` without validation.
     ///
     /// # Safety
     ///
@@ -51,9 +51,9 @@ impl NmtokenStr {
     /// # Examples
     ///
     /// ```
-    /// # use xml_string::names::NmtokenStr;
+    /// # use xml_string::names::Nmtoken;
     /// let tok = unsafe {
-    ///     NmtokenStr::new_unchecked("hello")
+    ///     Nmtoken::new_unchecked("hello")
     /// };
     /// assert_eq!(tok, "hello");
     /// ```
@@ -83,8 +83,8 @@ impl NmtokenStr {
     /// # Examples
     ///
     /// ```
-    /// # use xml_string::names::NmtokenStr;
-    /// let tok = NmtokenStr::from_str("hello")?;
+    /// # use xml_string::names::Nmtoken;
+    /// let tok = Nmtoken::from_str("hello")?;
     /// assert_eq!(tok, "hello");
     ///
     /// let s: &str = tok.as_str();
@@ -97,25 +97,25 @@ impl NmtokenStr {
         &self.0
     }
 
-    /// Parses the leading `NmtokenStr` and returns the value and the rest input.
+    /// Parses the leading `Nmtoken` and returns the value and the rest input.
     ///
     /// # Exmaples
     ///
     /// ```
-    /// # use xml_string::names::NmtokenStr;
+    /// # use xml_string::names::Nmtoken;
     /// let input = "hello, world";
-    /// let expected = NmtokenStr::from_str("hello").expect("valid Nmtoken");
+    /// let expected = Nmtoken::from_str("hello").expect("valid Nmtoken");
     /// assert_eq!(
-    ///     NmtokenStr::parse_next(input),
+    ///     Nmtoken::parse_next(input),
     ///     Ok((expected, ", world"))
     /// );
     /// # Ok::<_, xml_string::names::NameError>(())
     /// ```
     ///
     /// ```
-    /// # use xml_string::names::NmtokenStr;
+    /// # use xml_string::names::Nmtoken;
     /// let input = " ";
-    /// assert!(NmtokenStr::parse_next(input).is_err());
+    /// assert!(Nmtoken::parse_next(input).is_err());
     /// # Ok::<_, xml_string::names::NameError>(())
     /// ```
     pub fn parse_next(s: &str) -> Result<(&Self, &str), NameError> {
@@ -136,37 +136,37 @@ impl NmtokenStr {
     }
 }
 
-impl_traits_for_custom_string_slice!(NmtokenStr);
+impl_traits_for_custom_string_slice!(Nmtoken);
 
-impl<'a> TryFrom<&'a str> for &'a NmtokenStr {
+impl<'a> TryFrom<&'a str> for &'a Nmtoken {
     type Error = NameError;
 
     fn try_from(s: &'a str) -> Result<Self, Self::Error> {
-        NmtokenStr::validate(s)?;
+        Nmtoken::validate(s)?;
         Ok(unsafe {
             // This is safe because the string is validated.
-            NmtokenStr::new_unchecked(s)
+            Nmtoken::new_unchecked(s)
         })
     }
 }
 
-impl<'a> From<&'a NameStr> for &'a NmtokenStr {
+impl<'a> From<&'a Name> for &'a Nmtoken {
     #[inline]
-    fn from(s: &'a NameStr) -> Self {
+    fn from(s: &'a Name) -> Self {
         s.as_ref()
     }
 }
 
-impl<'a> From<&'a QnameStr> for &'a NmtokenStr {
+impl<'a> From<&'a Qname> for &'a Nmtoken {
     #[inline]
-    fn from(s: &'a QnameStr) -> Self {
+    fn from(s: &'a Qname) -> Self {
         s.as_ref()
     }
 }
 
-impl<'a> From<&'a NcnameStr> for &'a NmtokenStr {
+impl<'a> From<&'a Ncname> for &'a Nmtoken {
     #[inline]
-    fn from(s: &'a NcnameStr) -> Self {
+    fn from(s: &'a Ncname) -> Self {
         s.as_ref()
     }
 }
@@ -177,7 +177,7 @@ mod tests {
 
     fn ensure_eq(s: &str) {
         assert_eq!(
-            NmtokenStr::from_str(s).expect("Should not fail"),
+            Nmtoken::from_str(s).expect("Should not fail"),
             s,
             "String: {:?}",
             s
@@ -185,7 +185,7 @@ mod tests {
     }
 
     fn ensure_error_at(s: &str, valid_up_to: usize) {
-        let err = NmtokenStr::from_str(s).expect_err("Should fail");
+        let err = Nmtoken::from_str(s).expect_err("Should fail");
         assert_eq!(err.valid_up_to(), valid_up_to, "String: {:?}", s);
     }
 
