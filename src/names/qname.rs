@@ -3,6 +3,7 @@
 //! [`QName`]: https://www.w3.org/TR/2009/REC-xml-names-20091208/#NT-QName
 
 use core::convert::TryFrom;
+use core::fmt;
 use core::num::NonZeroUsize;
 
 use crate::names::error::{NameError, TargetNameType};
@@ -11,7 +12,7 @@ use crate::names::{Name, Ncname, Nmtoken};
 /// String slice for [`QName`].
 ///
 /// [`QName`]: https://www.w3.org/TR/2009/REC-xml-names-20091208/#NT-QName
-#[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[repr(transparent)]
 pub struct Qname(str);
 
@@ -361,7 +362,7 @@ impl<'a> TryFrom<&'a Qname> for &'a Ncname {
 /// Parsed [`QName`] reference.
 ///
 /// [`QName`]: https://www.w3.org/TR/2009/REC-xml-names-20091208/#NT-QName
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct ParsedQname<'a> {
     /// Content string.
     content: &'a Qname,
@@ -711,6 +712,20 @@ impl<'a> TryFrom<&'a str> for ParsedQname<'a> {
                 Err(NameError::new(TargetNameType::Qname, valid_up_to))
             }
         }
+    }
+}
+
+impl fmt::Debug for ParsedQname<'_> {
+    #[inline]
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.write_str(self.as_str())
+    }
+}
+
+impl fmt::Display for ParsedQname<'_> {
+    #[inline]
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.write_str(self.as_str())
     }
 }
 
