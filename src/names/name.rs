@@ -6,17 +6,17 @@ use core::convert::TryFrom;
 
 use crate::names::chars;
 use crate::names::error::{NameError, TargetNameType};
-use crate::names::{NcnameStr, NmtokenStr, QnameStr};
+use crate::names::{Ncname, Nmtoken, Qname};
 
 /// String slice for [`Name`].
 ///
 /// [`Name`]: https://www.w3.org/TR/2008/REC-xml-20081126/#NT-Name
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[repr(transparent)]
-pub struct NameStr(str);
+pub struct Name(str);
 
-impl NameStr {
-    /// Creates a new `&NameStr`.
+impl Name {
+    /// Creates a new `&Name`.
     ///
     /// # Failures
     ///
@@ -25,12 +25,12 @@ impl NameStr {
     /// # Examples
     ///
     /// ```
-    /// # use xml_string::names::NameStr;
-    /// let name = NameStr::from_str("hello")?;
+    /// # use xml_string::names::Name;
+    /// let name = Name::from_str("hello")?;
     /// assert_eq!(name, "hello");
     ///
-    /// assert!(NameStr::from_str("").is_err(), "Empty string is not a Name");
-    /// assert!(NameStr::from_str("foo bar").is_err(), "Whitespace is not allowed");
+    /// assert!(Name::from_str("").is_err(), "Empty string is not a Name");
+    /// assert!(Name::from_str("foo bar").is_err(), "Whitespace is not allowed");
     /// # Ok::<_, xml_string::names::NameError>(())
     /// ```
     ///
@@ -42,7 +42,7 @@ impl NameStr {
         <&Self>::try_from(s)
     }
 
-    /// Creates a new `&NameStr` without validation.
+    /// Creates a new `&Name` without validation.
     ///
     /// # Safety
     ///
@@ -51,9 +51,9 @@ impl NameStr {
     /// # Examples
     ///
     /// ```
-    /// # use xml_string::names::NameStr;
+    /// # use xml_string::names::Name;
     /// let name = unsafe {
-    ///     NameStr::new_unchecked("hello")
+    ///     Name::new_unchecked("hello")
     /// };
     /// assert_eq!(name, "hello");
     /// ```
@@ -87,8 +87,8 @@ impl NameStr {
     /// # Examples
     ///
     /// ```
-    /// # use xml_string::names::NameStr;
-    /// let name = NameStr::from_str("hello")?;
+    /// # use xml_string::names::Name;
+    /// let name = Name::from_str("hello")?;
     /// assert_eq!(name, "hello");
     ///
     /// let s: &str = name.as_str();
@@ -101,25 +101,25 @@ impl NameStr {
         &self.0
     }
 
-    /// Parses the leading `NameStr` and returns the value and the rest input.
+    /// Parses the leading `Name` and returns the value and the rest input.
     ///
     /// # Exmaples
     ///
     /// ```
-    /// # use xml_string::names::NameStr;
+    /// # use xml_string::names::Name;
     /// let input = "hello, world";
-    /// let expected = NameStr::from_str("hello").expect("valid Name");
+    /// let expected = Name::from_str("hello").expect("valid Name");
     /// assert_eq!(
-    ///     NameStr::parse_next(input),
+    ///     Name::parse_next(input),
     ///     Ok((expected, ", world"))
     /// );
     /// # Ok::<_, xml_string::names::NameError>(())
     /// ```
     ///
     /// ```
-    /// # use xml_string::names::NameStr;
+    /// # use xml_string::names::Name;
     /// let input = "012";
-    /// assert!(NameStr::parse_next(input).is_err());
+    /// assert!(Name::parse_next(input).is_err());
     /// # Ok::<_, xml_string::names::NameError>(())
     /// ```
     pub fn parse_next(s: &str) -> Result<(&Self, &str), NameError> {
@@ -140,53 +140,53 @@ impl NameStr {
     }
 }
 
-impl_traits_for_custom_string_slice!(NameStr);
+impl_traits_for_custom_string_slice!(Name);
 
-impl AsRef<NmtokenStr> for NameStr {
+impl AsRef<Nmtoken> for Name {
     #[inline]
-    fn as_ref(&self) -> &NmtokenStr {
+    fn as_ref(&self) -> &Nmtoken {
         unsafe {
             debug_assert!(
-                NmtokenStr::from_str(self.as_str()).is_ok(),
+                Nmtoken::from_str(self.as_str()).is_ok(),
                 "Name {:?} must be a valid Nmtoken",
                 self.as_str()
             );
             // This is safe because a Name is also a valid Nmtoken.
-            NmtokenStr::new_unchecked(self.as_str())
+            Nmtoken::new_unchecked(self.as_str())
         }
     }
 }
 
-impl<'a> From<&'a NcnameStr> for &'a NameStr {
+impl<'a> From<&'a Ncname> for &'a Name {
     #[inline]
-    fn from(s: &'a NcnameStr) -> Self {
+    fn from(s: &'a Ncname) -> Self {
         s.as_ref()
     }
 }
 
-impl<'a> From<&'a QnameStr> for &'a NameStr {
+impl<'a> From<&'a Qname> for &'a Name {
     #[inline]
-    fn from(s: &'a QnameStr) -> Self {
+    fn from(s: &'a Qname) -> Self {
         s.as_ref()
     }
 }
 
-impl<'a> TryFrom<&'a str> for &'a NameStr {
+impl<'a> TryFrom<&'a str> for &'a Name {
     type Error = NameError;
 
     fn try_from(s: &'a str) -> Result<Self, Self::Error> {
-        NameStr::validate(s)?;
+        Name::validate(s)?;
         Ok(unsafe {
             // This is safe because the string is validated.
-            NameStr::new_unchecked(s)
+            Name::new_unchecked(s)
         })
     }
 }
 
-impl<'a> TryFrom<&'a NmtokenStr> for &'a NameStr {
+impl<'a> TryFrom<&'a Nmtoken> for &'a Name {
     type Error = NameError;
 
-    fn try_from(s: &'a NmtokenStr) -> Result<Self, Self::Error> {
+    fn try_from(s: &'a Nmtoken) -> Result<Self, Self::Error> {
         let first = s
             .as_str()
             .chars()
@@ -198,8 +198,8 @@ impl<'a> TryFrom<&'a NmtokenStr> for &'a NameStr {
 
         Ok(unsafe {
             // This is safe because a Nmtoken starting with NameStartChar is also a valid Name.
-            debug_assert!(NameStr::validate(s.as_str()).is_ok());
-            NameStr::new_unchecked(s.as_str())
+            debug_assert!(Name::validate(s.as_str()).is_ok());
+            Name::new_unchecked(s.as_str())
         })
     }
 }
@@ -210,7 +210,7 @@ mod tests {
 
     fn ensure_eq(s: &str) {
         assert_eq!(
-            NameStr::from_str(s).expect("Should not fail"),
+            Name::from_str(s).expect("Should not fail"),
             s,
             "String: {:?}",
             s
@@ -218,7 +218,7 @@ mod tests {
     }
 
     fn ensure_error_at(s: &str, valid_up_to: usize) {
-        let err = NameStr::from_str(s).expect_err("Should fail");
+        let err = Name::from_str(s).expect_err("Should fail");
         assert_eq!(err.valid_up_to(), valid_up_to, "String: {:?}", s);
     }
 

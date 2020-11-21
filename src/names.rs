@@ -8,7 +8,7 @@ mod nmtoken;
 mod qname;
 
 pub use self::error::NameError;
-pub use self::name::NameStr;
-pub use self::ncname::NcnameStr;
-pub use self::nmtoken::NmtokenStr;
-pub use self::qname::{QnameRef, QnameStr};
+pub use self::name::Name;
+pub use self::ncname::Ncname;
+pub use self::nmtoken::Nmtoken;
+pub use self::qname::{ParsedQname, Qname};

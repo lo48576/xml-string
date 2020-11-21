@@ -6,17 +6,17 @@ use core::convert::TryFrom;
 use core::num::NonZeroUsize;
 
 use crate::names::error::{NameError, TargetNameType};
-use crate::names::{NameStr, NcnameStr, NmtokenStr};
+use crate::names::{Name, Ncname, Nmtoken};
 
 /// String slice for [`QName`].
 ///
 /// [`QName`]: https://www.w3.org/TR/2009/REC-xml-names-20091208/#NT-QName
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[repr(transparent)]
-pub struct QnameStr(str);
+pub struct Qname(str);
 
-impl QnameStr {
-    /// Creates a new `&QnameStr`.
+impl Qname {
+    /// Creates a new `&Qname`.
     ///
     /// # Failures
     ///
@@ -25,17 +25,17 @@ impl QnameStr {
     /// # Examples
     ///
     /// ```
-    /// # use xml_string::names::QnameStr;
-    /// let noprefix = QnameStr::from_str("hello")?;
+    /// # use xml_string::names::Qname;
+    /// let noprefix = Qname::from_str("hello")?;
     /// assert_eq!(noprefix, "hello");
     ///
-    /// let prefixed = QnameStr::from_str("foo:bar")?;
+    /// let prefixed = Qname::from_str("foo:bar")?;
     /// assert_eq!(prefixed, "foo:bar");
     ///
-    /// assert!(QnameStr::from_str("").is_err(), "Empty string is not a QName");
-    /// assert!(QnameStr::from_str("foo bar").is_err(), "Whitespace is not allowed");
-    /// assert!(QnameStr::from_str("foo:bar:baz").is_err(), "Two or more colons are not allowed");
-    /// assert!(QnameStr::from_str("0foo").is_err(), "ASCII digit at the beginning is not allowed");
+    /// assert!(Qname::from_str("").is_err(), "Empty string is not a QName");
+    /// assert!(Qname::from_str("foo bar").is_err(), "Whitespace is not allowed");
+    /// assert!(Qname::from_str("foo:bar:baz").is_err(), "Two or more colons are not allowed");
+    /// assert!(Qname::from_str("0foo").is_err(), "ASCII digit at the beginning is not allowed");
     /// # Ok::<_, xml_string::names::NameError>(())
     /// ```
     ///
@@ -46,7 +46,7 @@ impl QnameStr {
         <&Self>::try_from(s)
     }
 
-    /// Creates a new `&QnameStr` without validation.
+    /// Creates a new `&Qname` without validation.
     ///
     /// # Safety
     ///
@@ -55,9 +55,9 @@ impl QnameStr {
     /// # Examples
     ///
     /// ```
-    /// # use xml_string::names::QnameStr;
+    /// # use xml_string::names::Qname;
     /// let name = unsafe {
-    ///     QnameStr::new_unchecked("foo:bar")
+    ///     Qname::new_unchecked("foo:bar")
     /// };
     /// assert_eq!(name, "foo:bar");
     /// ```
@@ -85,7 +85,7 @@ impl QnameStr {
     /// Returns `Err((colon_position, valid_up_to))` if the string is invalid.
     fn parse_as_possible(s: &str) -> Result<Option<NonZeroUsize>, (Option<NonZeroUsize>, usize)> {
         // Parse the first component (prefix or full QName without prefix).
-        let prefix_len = match NcnameStr::from_str(s) {
+        let prefix_len = match Ncname::from_str(s) {
             Ok(_) => return Ok(None),
             Err(e) => e.valid_up_to(),
         };
@@ -95,7 +95,7 @@ impl QnameStr {
         }
         assert!(
             prefix_len < s.len(),
-            "`prefix_len` cannot be `s.len()`, because `s` is invalid as `NcnameStr`"
+            "`prefix_len` cannot be `s.len()`, because `s` is invalid as `Ncname`"
         );
         if s.as_bytes()[prefix_len] != b':' {
             // Prefix does not followed by a colon.
@@ -103,7 +103,7 @@ impl QnameStr {
         }
         let local_part = &s[(prefix_len + 1)..];
 
-        match NcnameStr::from_str(local_part) {
+        match Ncname::from_str(local_part) {
             Ok(_) => Ok(NonZeroUsize::new(prefix_len)),
             Err(e) if e.valid_up_to() == 0 => Err((None, prefix_len)),
             Err(e) => Err((
@@ -118,8 +118,8 @@ impl QnameStr {
     /// # Examples
     ///
     /// ```
-    /// # use xml_string::names::QnameStr;
-    /// let name = QnameStr::from_str("foo:bar")?;
+    /// # use xml_string::names::Qname;
+    /// let name = Qname::from_str("foo:bar")?;
     /// assert_eq!(name, "foo:bar");
     ///
     /// let s: &str = name.as_str();
@@ -132,36 +132,36 @@ impl QnameStr {
         &self.0
     }
 
-    /// Parses the leading `QameStr` and returns the value and the rest input.
+    /// Parses the leading `Qname` and returns the value and the rest input.
     ///
     /// # Exmaples
     ///
     /// ```
-    /// # use xml_string::names::QnameStr;
+    /// # use xml_string::names::Qname;
     /// let input = "hello:012";
-    /// let expected = QnameStr::from_str("hello").expect("valid Qname");
+    /// let expected = Qname::from_str("hello").expect("valid Qname");
     /// assert_eq!(
-    ///     QnameStr::parse_next(input),
+    ///     Qname::parse_next(input),
     ///     Ok((expected, ":012"))
     /// );
     /// # Ok::<_, xml_string::names::NameError>(())
     /// ```
     ///
     /// ```
-    /// # use xml_string::names::QnameStr;
+    /// # use xml_string::names::Qname;
     /// let input = "hello:world:foo";
-    /// let expected = QnameStr::from_str("hello:world").expect("valid Qname");
+    /// let expected = Qname::from_str("hello:world").expect("valid Qname");
     /// assert_eq!(
-    ///     QnameStr::parse_next(input),
+    ///     Qname::parse_next(input),
     ///     Ok((expected, ":foo"))
     /// );
     /// # Ok::<_, xml_string::names::NameError>(())
     /// ```
     ///
     /// ```
-    /// # use xml_string::names::QnameStr;
+    /// # use xml_string::names::Qname;
     /// let input = "012";
-    /// assert!(QnameStr::parse_next(input).is_err());
+    /// assert!(Qname::parse_next(input).is_err());
     /// # Ok::<_, xml_string::names::NameError>(())
     /// ```
     pub fn parse_next(s: &str) -> Result<(&Self, &str), NameError> {
@@ -192,16 +192,16 @@ impl QnameStr {
     /// Returns whether the QName has a prefix.
     ///
     /// Note that this is O(length) operation.
-    /// Consider using [`QnameRef::has_prefix`] method if possible.
+    /// Consider using [`ParsedQname::has_prefix`] method if possible.
     ///
     /// # Examples
     ///
     /// ```
-    /// # use xml_string::names::QnameStr;
-    /// let local_only = QnameStr::from_str("hello")?;
+    /// # use xml_string::names::Qname;
+    /// let local_only = Qname::from_str("hello")?;
     /// assert!(!local_only.has_prefix());
     ///
-    /// let prefixed = QnameStr::from_str("foo:bar")?;
+    /// let prefixed = Qname::from_str("foo:bar")?;
     /// assert!(prefixed.has_prefix());
     /// # Ok::<_, xml_string::names::NameError>(())
     /// ```
@@ -214,146 +214,146 @@ impl QnameStr {
     /// Returns the prefix if available.
     ///
     /// Note that this is O(length) operation.
-    /// Consider using [`QnameRef::prefix`] method if possible.
+    /// Consider using [`ParsedQname::prefix`] method if possible.
     ///
     /// # Examples
     ///
     /// ```
-    /// # use xml_string::names::QnameStr;
-    /// let prefixed = QnameStr::from_str("foo:bar")?;
+    /// # use xml_string::names::Qname;
+    /// let prefixed = Qname::from_str("foo:bar")?;
     /// assert_eq!(prefixed.prefix().map(|s| s.as_str()), Some("foo"));
     ///
-    /// let noprefix = QnameStr::from_str("foo")?;
+    /// let noprefix = Qname::from_str("foo")?;
     /// assert_eq!(noprefix.prefix().map(|s| s.as_str()), None);
     /// # Ok::<_, xml_string::names::NameError>(())
     /// ```
     #[inline]
     #[must_use]
-    pub fn prefix(&self) -> Option<&NcnameStr> {
-        QnameRef::new(self, self.prefix_len()).prefix()
+    pub fn prefix(&self) -> Option<&Ncname> {
+        ParsedQname::new(self, self.prefix_len()).prefix()
     }
 
     /// Returns the local part.
     ///
     /// Note that this is O(length) operation.
-    /// Consider using [`QnameRef::local_part`] method if possible.
+    /// Consider using [`ParsedQname::local_part`] method if possible.
     ///
     /// # Examples
     ///
     /// ```
-    /// # use xml_string::names::QnameStr;
-    /// let prefixed = QnameStr::from_str("foo:bar")?;
+    /// # use xml_string::names::Qname;
+    /// let prefixed = Qname::from_str("foo:bar")?;
     /// assert_eq!(prefixed.local_part(), "bar");
     ///
-    /// let noprefix = QnameStr::from_str("foo")?;
+    /// let noprefix = Qname::from_str("foo")?;
     /// assert_eq!(noprefix.local_part(), "foo");
     /// # Ok::<_, xml_string::names::NameError>(())
     /// ```
     #[inline]
     #[must_use]
-    pub fn local_part(&self) -> &NcnameStr {
-        QnameRef::new(self, self.prefix_len()).local_part()
+    pub fn local_part(&self) -> &Ncname {
+        ParsedQname::new(self, self.prefix_len()).local_part()
     }
 
     /// Returns a pair of the prefix (if available) and the local part.
     ///
     /// Note that this is O(length) operation.
-    /// Consider using [`QnameRef::prefix_and_local`] method if possible.
+    /// Consider using [`ParsedQname::prefix_and_local`] method if possible.
     ///
     /// # Examples
     ///
     /// ```
-    /// # use xml_string::names::QnameStr;
+    /// # use xml_string::names::Qname;
     /// use std::convert::TryFrom;
     ///
-    /// let noprefix = QnameStr::from_str("hello")?;
+    /// let noprefix = Qname::from_str("hello")?;
     /// assert_eq!(noprefix.prefix_and_local(), (noprefix.prefix(), noprefix.local_part()));
     ///
-    /// let prefixed = QnameStr::from_str("foo:bar")?;
+    /// let prefixed = Qname::from_str("foo:bar")?;
     /// assert_eq!(prefixed.prefix_and_local(), (prefixed.prefix(), prefixed.local_part()));
     /// # Ok::<_, xml_string::names::NameError>(())
     /// ```
     #[inline]
     #[must_use]
-    pub fn prefix_and_local(&self) -> (Option<&NcnameStr>, &NcnameStr) {
-        QnameRef::new(self, self.prefix_len()).prefix_and_local()
+    pub fn prefix_and_local(&self) -> (Option<&Ncname>, &Ncname) {
+        ParsedQname::new(self, self.prefix_len()).prefix_and_local()
     }
 }
 
-impl_traits_for_custom_string_slice!(QnameStr);
+impl_traits_for_custom_string_slice!(Qname);
 
-impl AsRef<NameStr> for QnameStr {
+impl AsRef<Name> for Qname {
     #[inline]
-    fn as_ref(&self) -> &NameStr {
+    fn as_ref(&self) -> &Name {
         unsafe {
             debug_assert!(
-                NameStr::from_str(self.as_str()).is_ok(),
+                Name::from_str(self.as_str()).is_ok(),
                 "QName {:?} must be a valid Name",
                 self.as_str()
             );
             // This is safe because a QName is also a valid NCName.
-            NameStr::new_unchecked(self.as_str())
+            Name::new_unchecked(self.as_str())
         }
     }
 }
 
-impl AsRef<NmtokenStr> for QnameStr {
+impl AsRef<Nmtoken> for Qname {
     #[inline]
-    fn as_ref(&self) -> &NmtokenStr {
+    fn as_ref(&self) -> &Nmtoken {
         unsafe {
             debug_assert!(
-                NmtokenStr::from_str(self.as_str()).is_ok(),
+                Nmtoken::from_str(self.as_str()).is_ok(),
                 "QName {:?} must be a valid Nmtoken",
                 self.as_str()
             );
             // This is safe because a QName is also a valid Nmtoken.
-            NmtokenStr::new_unchecked(self.as_str())
+            Nmtoken::new_unchecked(self.as_str())
         }
     }
 }
 
-impl<'a> From<&'a NcnameStr> for &'a QnameStr {
+impl<'a> From<&'a Ncname> for &'a Qname {
     #[inline]
-    fn from(s: &'a NcnameStr) -> Self {
+    fn from(s: &'a Ncname) -> Self {
         s.as_ref()
     }
 }
 
-impl<'a> From<QnameRef<'a>> for &'a QnameStr {
+impl<'a> From<ParsedQname<'a>> for &'a Qname {
     #[inline]
-    fn from(s: QnameRef<'a>) -> Self {
+    fn from(s: ParsedQname<'a>) -> Self {
         s.content
     }
 }
 
-impl<'a> TryFrom<&'a str> for &'a QnameStr {
+impl<'a> TryFrom<&'a str> for &'a Qname {
     type Error = NameError;
 
     fn try_from(s: &'a str) -> Result<Self, Self::Error> {
-        QnameStr::validate(s)?;
+        Qname::validate(s)?;
         Ok(unsafe {
             // This is safe because the string is validated.
-            QnameStr::new_unchecked(s)
+            Qname::new_unchecked(s)
         })
     }
 }
 
-impl<'a> TryFrom<&'a QnameStr> for &'a NcnameStr {
+impl<'a> TryFrom<&'a Qname> for &'a Ncname {
     type Error = NameError;
 
-    fn try_from(s: &'a QnameStr) -> Result<Self, Self::Error> {
+    fn try_from(s: &'a Qname) -> Result<Self, Self::Error> {
         if let Some(p_len) = s.prefix_len() {
             return Err(NameError::new(TargetNameType::Ncname, p_len.get()));
         }
 
         unsafe {
             debug_assert!(
-                NcnameStr::from_str(s.as_str()).is_ok(),
+                Ncname::from_str(s.as_str()).is_ok(),
                 "QName {:?} without prefix must be a valid NCName",
                 s.as_str()
             );
             // This is safe because a QName without prefix is also a valid NCName.
-            Ok(NcnameStr::new_unchecked(s.as_str()))
+            Ok(Ncname::new_unchecked(s.as_str()))
         }
     }
 }
@@ -362,23 +362,23 @@ impl<'a> TryFrom<&'a QnameStr> for &'a NcnameStr {
 ///
 /// [`QName`]: https://www.w3.org/TR/2009/REC-xml-names-20091208/#NT-QName
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
-pub struct QnameRef<'a> {
+pub struct ParsedQname<'a> {
     /// Content string.
-    content: &'a QnameStr,
+    content: &'a Qname,
     /// Length of the prefix, if available.
     ///
     /// If this is `Some(p_len)`, `self.content.as_str().as_bytes()[p_len] == b':'` is guaranteed.
     prefix_len: Option<NonZeroUsize>,
 }
 
-impl<'a> QnameRef<'a> {
-    /// Creates a new `QnameRef`.
+impl<'a> ParsedQname<'a> {
+    /// Creates a new `ParsedQname`.
     ///
     /// # Panics
     ///
     /// Panics if the `prefix_len` does not point to the colon in the `content`.
     #[must_use]
-    fn new(content: &'a QnameStr, prefix_len: Option<NonZeroUsize>) -> Self {
+    fn new(content: &'a Qname, prefix_len: Option<NonZeroUsize>) -> Self {
         if let Some(p_len) = prefix_len {
             if content.as_str().as_bytes()[p_len.get()] != b':' {
                 panic!(
@@ -395,7 +395,7 @@ impl<'a> QnameRef<'a> {
         }
     }
 
-    /// Creates a new `QnameRef<'_>` from the given string slice.
+    /// Creates a new `ParsedQname<'_>` from the given string slice.
     ///
     /// # Failures
     ///
@@ -404,17 +404,17 @@ impl<'a> QnameRef<'a> {
     /// # Examples
     ///
     /// ```
-    /// # use xml_string::names::QnameRef;
-    /// let noprefix = QnameRef::from_str("hello")?;
+    /// # use xml_string::names::ParsedQname;
+    /// let noprefix = ParsedQname::from_str("hello")?;
     /// assert_eq!(noprefix, "hello");
     ///
-    /// let prefixed = QnameRef::from_str("foo:bar")?;
+    /// let prefixed = ParsedQname::from_str("foo:bar")?;
     /// assert_eq!(prefixed, "foo:bar");
     ///
-    /// assert!(QnameRef::from_str("").is_err(), "Empty string is not a QName");
-    /// assert!(QnameRef::from_str("foo bar").is_err(), "Whitespace is not allowed");
-    /// assert!(QnameRef::from_str("foo:bar:baz").is_err(), "Two or more colons are not allowed");
-    /// assert!(QnameRef::from_str("0foo").is_err(), "ASCII digit at the beginning is not allowed");
+    /// assert!(ParsedQname::from_str("").is_err(), "Empty string is not a QName");
+    /// assert!(ParsedQname::from_str("foo bar").is_err(), "Whitespace is not allowed");
+    /// assert!(ParsedQname::from_str("foo:bar:baz").is_err(), "Two or more colons are not allowed");
+    /// assert!(ParsedQname::from_str("0foo").is_err(), "ASCII digit at the beginning is not allowed");
     /// # Ok::<_, xml_string::names::NameError>(())
     /// ```
     ///
@@ -426,24 +426,24 @@ impl<'a> QnameRef<'a> {
         Self::try_from(s)
     }
 
-    /// Returns the string as `&QnameStr`.
+    /// Returns the string as `&Qname`.
     ///
     /// # Exmaples
     ///
     /// ```
-    /// # use xml_string::names::QnameRef;
-    /// use xml_string::names::QnameStr;
+    /// # use xml_string::names::ParsedQname;
+    /// use xml_string::names::Qname;
     ///
-    /// let name = QnameRef::from_str("hello")?;
+    /// let name = ParsedQname::from_str("hello")?;
     /// assert_eq!(name, "hello");
     ///
-    /// let s: &QnameStr = name.as_qname_str();
+    /// let s: &Qname = name.as_qname_str();
     /// assert_eq!(s, "hello");
     /// # Ok::<_, xml_string::names::NameError>(())
     /// ```
     #[inline]
     #[must_use]
-    pub fn as_qname_str(&self) -> &'a QnameStr {
+    pub fn as_qname_str(&self) -> &'a Qname {
         self.content
     }
 
@@ -452,8 +452,8 @@ impl<'a> QnameRef<'a> {
     /// # Exmaples
     ///
     /// ```
-    /// # use xml_string::names::QnameRef;
-    /// let name = QnameRef::from_str("hello")?;
+    /// # use xml_string::names::ParsedQname;
+    /// let name = ParsedQname::from_str("hello")?;
     /// assert_eq!(name, "hello");
     ///
     /// let s: &str = name.as_str();
@@ -471,11 +471,11 @@ impl<'a> QnameRef<'a> {
     /// # Examples
     ///
     /// ```
-    /// # use xml_string::names::QnameRef;
-    /// let local_only = QnameRef::from_str("hello")?;
+    /// # use xml_string::names::ParsedQname;
+    /// let local_only = ParsedQname::from_str("hello")?;
     /// assert!(!local_only.has_prefix());
     ///
-    /// let prefixed = QnameRef::from_str("foo:bar")?;
+    /// let prefixed = ParsedQname::from_str("foo:bar")?;
     /// assert!(prefixed.has_prefix());
     /// # Ok::<_, xml_string::names::NameError>(())
     /// ```
@@ -490,26 +490,26 @@ impl<'a> QnameRef<'a> {
     /// # Examples
     ///
     /// ```
-    /// # use xml_string::names::QnameRef;
-    /// let prefixed = QnameRef::from_str("foo:bar")?;
+    /// # use xml_string::names::ParsedQname;
+    /// let prefixed = ParsedQname::from_str("foo:bar")?;
     /// assert_eq!(prefixed.prefix().map(|s| s.as_str()), Some("foo"));
     ///
-    /// let noprefix = QnameRef::from_str("foo")?;
+    /// let noprefix = ParsedQname::from_str("foo")?;
     /// assert_eq!(noprefix.prefix().map(|s| s.as_str()), None);
     /// # Ok::<_, xml_string::names::NameError>(())
     /// ```
     #[must_use]
-    pub fn prefix(&self) -> Option<&'a NcnameStr> {
+    pub fn prefix(&self) -> Option<&'a Ncname> {
         self.prefix_len.as_ref().map(|p_len| {
             let prefix = &self.as_str()[..p_len.get()];
             unsafe {
                 debug_assert!(
-                    NcnameStr::from_str(prefix).is_ok(),
+                    Ncname::from_str(prefix).is_ok(),
                     "The prefix {:?} must be a valid NCName",
                     prefix
                 );
                 // This is safe because the prefix is a valid NCName.
-                NcnameStr::new_unchecked(prefix)
+                Ncname::new_unchecked(prefix)
             }
         })
     }
@@ -519,26 +519,26 @@ impl<'a> QnameRef<'a> {
     /// # Examples
     ///
     /// ```
-    /// # use xml_string::names::QnameRef;
-    /// let prefixed = QnameRef::from_str("foo:bar")?;
+    /// # use xml_string::names::ParsedQname;
+    /// let prefixed = ParsedQname::from_str("foo:bar")?;
     /// assert_eq!(prefixed.local_part(), "bar");
     ///
-    /// let noprefix = QnameRef::from_str("foo")?;
+    /// let noprefix = ParsedQname::from_str("foo")?;
     /// assert_eq!(noprefix.local_part(), "foo");
     /// # Ok::<_, xml_string::names::NameError>(())
     /// ```
     #[must_use]
-    pub fn local_part(&self) -> &'a NcnameStr {
+    pub fn local_part(&self) -> &'a Ncname {
         let start = self.prefix_len.as_ref().map_or(0, |p_len| p_len.get() + 1);
         let local_part = &self.as_str()[start..];
         unsafe {
             debug_assert!(
-                NcnameStr::from_str(local_part).is_ok(),
+                Ncname::from_str(local_part).is_ok(),
                 "The local part {:?} must be a valid NCName",
                 local_part
             );
             // This is safe because the local part is a valid NCName.
-            NcnameStr::new_unchecked(local_part)
+            Ncname::new_unchecked(local_part)
         }
     }
 
@@ -549,42 +549,42 @@ impl<'a> QnameRef<'a> {
     /// # Examples
     ///
     /// ```
-    /// # use xml_string::names::QnameRef;
+    /// # use xml_string::names::ParsedQname;
     /// use std::convert::TryFrom;
     ///
-    /// let noprefix = QnameRef::from_str("hello")?;
+    /// let noprefix = ParsedQname::from_str("hello")?;
     /// assert_eq!(noprefix.prefix_and_local(), (noprefix.prefix(), noprefix.local_part()));
     ///
-    /// let prefixed = QnameRef::from_str("foo:bar")?;
+    /// let prefixed = ParsedQname::from_str("foo:bar")?;
     /// assert_eq!(prefixed.prefix_and_local(), (prefixed.prefix(), prefixed.local_part()));
     /// # Ok::<_, xml_string::names::NameError>(())
     /// ```
     #[must_use]
-    pub fn prefix_and_local(&self) -> (Option<&'a NcnameStr>, &'a NcnameStr) {
+    pub fn prefix_and_local(&self) -> (Option<&'a Ncname>, &'a Ncname) {
         match self.prefix_len {
             Some(p_len) => {
                 let prefix = {
                     let prefix = &self.as_str()[..p_len.get()];
                     unsafe {
                         debug_assert!(
-                            NcnameStr::from_str(prefix).is_ok(),
+                            Ncname::from_str(prefix).is_ok(),
                             "The prefix {:?} must be a valid NCName",
                             prefix
                         );
                         // This is safe because the prefix is a valid NCName.
-                        NcnameStr::new_unchecked(prefix)
+                        Ncname::new_unchecked(prefix)
                     }
                 };
                 let local_part = {
                     let local_part = &self.as_str()[(p_len.get() + 1)..];
                     unsafe {
                         debug_assert!(
-                            NcnameStr::from_str(local_part).is_ok(),
+                            Ncname::from_str(local_part).is_ok(),
                             "The local part {:?} must be a valid NCName",
                             local_part
                         );
                         // This is safe because the local part is a valid NCName.
-                        NcnameStr::new_unchecked(local_part)
+                        Ncname::new_unchecked(local_part)
                     }
                 };
                 (Some(prefix), local_part)
@@ -592,10 +592,10 @@ impl<'a> QnameRef<'a> {
             None => {
                 let ncname = unsafe {
                     debug_assert!(
-                        NcnameStr::from_str(self.as_str()).is_ok(),
+                        Ncname::from_str(self.as_str()).is_ok(),
                         "QName without prefix must be a valid NCName"
                     );
-                    NcnameStr::new_unchecked(self.as_str())
+                    Ncname::new_unchecked(self.as_str())
                 };
                 (None, ncname)
             }
@@ -603,86 +603,86 @@ impl<'a> QnameRef<'a> {
     }
 }
 
-impl PartialEq<str> for QnameRef<'_> {
+impl PartialEq<str> for ParsedQname<'_> {
     #[inline]
     fn eq(&self, other: &str) -> bool {
         self.as_str() == other
     }
 }
-impl_cmp!(str, QnameRef<'_>);
+impl_cmp!(str, ParsedQname<'_>);
 
-impl PartialEq<&'_ str> for QnameRef<'_> {
+impl PartialEq<&'_ str> for ParsedQname<'_> {
     #[inline]
     fn eq(&self, other: &&str) -> bool {
         self.as_str() == *other
     }
 }
-impl_cmp!(&str, QnameRef<'_>);
+impl_cmp!(&str, ParsedQname<'_>);
 
-impl PartialEq<str> for &'_ QnameRef<'_> {
+impl PartialEq<str> for &'_ ParsedQname<'_> {
     #[inline]
     fn eq(&self, other: &str) -> bool {
         self.as_str() == other
     }
 }
-impl_cmp!(str, &QnameRef<'_>);
+impl_cmp!(str, &ParsedQname<'_>);
 
 #[cfg(feature = "alloc")]
-impl PartialEq<alloc::string::String> for QnameRef<'_> {
+impl PartialEq<alloc::string::String> for ParsedQname<'_> {
     #[inline]
     fn eq(&self, other: &alloc::string::String) -> bool {
         self.as_str() == *other
     }
 }
 #[cfg(feature = "alloc")]
-impl_cmp!(alloc::string::String, QnameRef<'_>);
+impl_cmp!(alloc::string::String, ParsedQname<'_>);
 
 #[cfg(feature = "alloc")]
-impl PartialEq<&alloc::string::String> for QnameRef<'_> {
+impl PartialEq<&alloc::string::String> for ParsedQname<'_> {
     #[inline]
     fn eq(&self, other: &&alloc::string::String) -> bool {
         self.as_str() == **other
     }
 }
 #[cfg(feature = "alloc")]
-impl_cmp!(&alloc::string::String, QnameRef<'_>);
+impl_cmp!(&alloc::string::String, ParsedQname<'_>);
 
 #[cfg(feature = "alloc")]
-impl PartialEq<alloc::boxed::Box<str>> for QnameRef<'_> {
+impl PartialEq<alloc::boxed::Box<str>> for ParsedQname<'_> {
     #[inline]
     fn eq(&self, other: &alloc::boxed::Box<str>) -> bool {
         self.as_str() == other.as_ref()
     }
 }
 #[cfg(feature = "alloc")]
-impl_cmp!(alloc::boxed::Box<str>, QnameRef<'_>);
+impl_cmp!(alloc::boxed::Box<str>, ParsedQname<'_>);
 
 #[cfg(feature = "alloc")]
-impl PartialEq<alloc::borrow::Cow<'_, str>> for QnameRef<'_> {
+impl PartialEq<alloc::borrow::Cow<'_, str>> for ParsedQname<'_> {
     #[inline]
     fn eq(&self, other: &alloc::borrow::Cow<'_, str>) -> bool {
         self.as_str() == *other
     }
 }
 #[cfg(feature = "alloc")]
-impl_cmp!(alloc::borrow::Cow<'_, str>, QnameRef<'_>);
+impl_cmp!(alloc::borrow::Cow<'_, str>, ParsedQname<'_>);
 
-impl AsRef<str> for QnameRef<'_> {
+impl AsRef<str> for ParsedQname<'_> {
     #[inline]
     fn as_ref(&self) -> &str {
         self.as_str()
     }
 }
 
-impl AsRef<QnameStr> for QnameRef<'_> {
+impl AsRef<Qname> for ParsedQname<'_> {
     #[inline]
-    fn as_ref(&self) -> &QnameStr {
+    fn as_ref(&self) -> &Qname {
         self.content
     }
 }
 
-impl<'a> From<&'a QnameStr> for QnameRef<'a> {
-    fn from(s: &'a QnameStr) -> Self {
+impl<'a> From<&'a Qname> for ParsedQname<'a> {
+    fn from(s: &'a Qname) -> Self {
         let prefix_len = s.as_str().find(':').and_then(NonZeroUsize::new);
         Self {
             content: s,
@@ -691,16 +691,16 @@ impl<'a> From<&'a QnameStr> for QnameRef<'a> {
     }
 }
 
-impl<'a> TryFrom<&'a str> for QnameRef<'a> {
+impl<'a> TryFrom<&'a str> for ParsedQname<'a> {
     type Error = NameError;
 
     fn try_from(s: &'a str) -> Result<Self, Self::Error> {
-        match QnameStr::parse_as_possible(s) {
+        match Qname::parse_as_possible(s) {
             Ok(prefix_len) => {
                 let content = unsafe {
                     // This is safe because the string is validated by
-                    // `QnameStr::parse_as_possible()`.
-                    QnameStr::new_unchecked(s)
+                    // `Qname::parse_as_possible()`.
+                    Qname::new_unchecked(s)
                 };
                 Ok(Self {
                     content,
@@ -718,24 +718,23 @@ impl<'a> TryFrom<&'a str> for QnameRef<'a> {
 mod tests {
     use super::*;
 
-    fn ncname(s: &str) -> &NcnameStr {
-        NcnameStr::from_str(s)
-            .unwrap_or_else(|e| panic!("Failed to cerate NcnameStr from {:?}: {}", s, e))
+    fn ncname(s: &str) -> &Ncname {
+        Ncname::from_str(s)
+            .unwrap_or_else(|e| panic!("Failed to cerate Ncname from {:?}: {}", s, e))
     }
 
-    fn qname(s: &str) -> &QnameStr {
-        QnameStr::from_str(s)
-            .unwrap_or_else(|e| panic!("Failed to cerate QnameStr from {:?}: {}", s, e))
+    fn qname(s: &str) -> &Qname {
+        Qname::from_str(s).unwrap_or_else(|e| panic!("Failed to cerate Qname from {:?}: {}", s, e))
     }
 
-    fn qname_ref(s: &str) -> QnameRef<'_> {
-        QnameRef::from_str(s)
-            .unwrap_or_else(|e| panic!("Failed to cerate QnameRef from {:?}: {}", s, e))
+    fn qname_ref(s: &str) -> ParsedQname<'_> {
+        ParsedQname::from_str(s)
+            .unwrap_or_else(|e| panic!("Failed to cerate ParsedQname from {:?}: {}", s, e))
     }
 
     fn ensure_eq(s: &str) {
         assert_eq!(
-            QnameStr::from_str(s).expect("Should not fail"),
+            Qname::from_str(s).expect("Should not fail"),
             s,
             "String: {:?}",
             s
@@ -743,7 +742,7 @@ mod tests {
     }
 
     fn ensure_error_at(s: &str, valid_up_to: usize) {
-        let err = QnameStr::from_str(s).expect_err("Should fail");
+        let err = Qname::from_str(s).expect_err("Should fail");
         assert_eq!(err.valid_up_to(), valid_up_to, "String: {:?}", s);
     }
 
@@ -771,35 +770,35 @@ mod tests {
 
     #[test]
     fn parse_as_possible() {
-        assert_eq!(QnameStr::parse_as_possible("foo"), Ok(None));
+        assert_eq!(Qname::parse_as_possible("foo"), Ok(None));
         assert_eq!(
-            QnameStr::parse_as_possible("foo:bar"),
+            Qname::parse_as_possible("foo:bar"),
             Ok(NonZeroUsize::new(3))
         );
 
-        assert_eq!(QnameStr::parse_as_possible(""), Err((None, 0)));
-        assert_eq!(QnameStr::parse_as_possible("foo:"), Err((None, 3)));
-        assert_eq!(QnameStr::parse_as_possible(":foo"), Err((None, 0)));
+        assert_eq!(Qname::parse_as_possible(""), Err((None, 0)));
+        assert_eq!(Qname::parse_as_possible("foo:"), Err((None, 3)));
+        assert_eq!(Qname::parse_as_possible(":foo"), Err((None, 0)));
         assert_eq!(
-            QnameStr::parse_as_possible("foo:bar:baz"),
+            Qname::parse_as_possible("foo:bar:baz"),
             Err((NonZeroUsize::new(3), 7))
         );
-        assert_eq!(QnameStr::parse_as_possible("foo::bar"), Err((None, 3)));
+        assert_eq!(Qname::parse_as_possible("foo::bar"), Err((None, 3)));
     }
 
     #[test]
     fn qname_ref_from_str() {
         assert_eq!(
-            QnameRef::from_str("hello").map(|v| v.as_qname_str()),
+            ParsedQname::from_str("hello").map(|v| v.as_qname_str()),
             Ok(qname("hello"))
         );
         assert_eq!(
-            QnameRef::from_str("foo:bar").map(|v| v.as_qname_str()),
+            ParsedQname::from_str("foo:bar").map(|v| v.as_qname_str()),
             Ok(qname("foo:bar"))
         );
 
         assert_eq!(
-            QnameRef::from_str("foo:-bar"),
+            ParsedQname::from_str("foo:-bar"),
             Err(NameError::new(TargetNameType::Qname, 3))
         );
     }
