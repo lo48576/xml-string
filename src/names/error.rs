@@ -86,6 +86,11 @@ pub(super) enum TargetNameType {
     ///
     /// [`QName`]: https://www.w3.org/TR/2009/REC-xml-names-20091208/#NT-QName
     Qname,
+    /// [`URIQualifiedName`].
+    ///
+    /// [`URIQualifiedName`]:
+    ///     https://www.w3.org/TR/2017/REC-xpath-31-20170321/#prod-xpath31-URIQualifiedName
+    UriQualifiedName,
 }
 
 impl TargetNameType {
@@ -96,6 +101,7 @@ impl TargetNameType {
             Self::Ncname => "NCName",
             Self::Nmtoken => "Nmtoken",
             Self::Qname => "QName",
+            Self::UriQualifiedName => "URIQualifiedName",
         }
     }
 }
