@@ -279,6 +279,28 @@ impl Qname {
     pub fn prefix_and_local(&self) -> (Option<&Ncname>, &Ncname) {
         ParsedQname::new(self, self.prefix_len()).prefix_and_local()
     }
+
+    /// Converts a `Box<Qname>` into a `Box<str>` without copying or allocating.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use xml_string::names::Qname;
+    /// let name = Qname::from_str("q:name")?;
+    /// let boxed_name: Box<Qname> = name.into();
+    /// assert_eq!(&*boxed_name, name);
+    /// let boxed_str: Box<str> = boxed_name.into_boxed_str();
+    /// assert_eq!(&*boxed_str, name.as_str());
+    /// # Ok::<_, xml_string::names::NameError>(())
+    /// ```
+    #[cfg(feature = "alloc")]
+    pub fn into_boxed_str(self: alloc::boxed::Box<Self>) -> Box<str> {
+        unsafe {
+            // This is safe because `Qname` has the same memory layout as `str`
+            // (thanks to `#[repr(transparent)]`).
+            alloc::boxed::Box::<str>::from_raw(alloc::boxed::Box::<Self>::into_raw(self) as *mut str)
+        }
+    }
 }
 
 impl_traits_for_custom_string_slice!(Qname);
