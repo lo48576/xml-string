@@ -138,6 +138,28 @@ impl Name {
             }
         }
     }
+
+    /// Converts a `Box<Name>` into a `Box<str>` without copying or allocating.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use xml_string::names::Name;
+    /// let name = Name::from_str("name")?;
+    /// let boxed_name: Box<Name> = name.into();
+    /// assert_eq!(&*boxed_name, name);
+    /// let boxed_str: Box<str> = boxed_name.into_boxed_str();
+    /// assert_eq!(&*boxed_str, name.as_str());
+    /// # Ok::<_, xml_string::names::NameError>(())
+    /// ```
+    #[cfg(feature = "alloc")]
+    pub fn into_boxed_str(self: alloc::boxed::Box<Self>) -> Box<str> {
+        unsafe {
+            // This is safe because `Name` has the same memory layout as `str`
+            // (thanks to `#[repr(transparent)]`).
+            alloc::boxed::Box::<str>::from_raw(alloc::boxed::Box::<Self>::into_raw(self) as *mut str)
+        }
+    }
 }
 
 impl_traits_for_custom_string_slice!(Name);
