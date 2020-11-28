@@ -98,5 +98,43 @@ macro_rules! impl_traits_for_custom_string_slice {
                 }
             }
         }
+
+        #[cfg(feature = "alloc")]
+        impl From<&$custom_str> for $crate::alloc::rc::Rc<$custom_str> {
+            fn from(s: &$custom_str) -> Self {
+                use $crate::alloc::rc::Rc;
+
+                let inner = s.as_str();
+                let inner_boxed = Rc::<str>::from(inner);
+                unsafe {
+                    // This is safe when `$custom_str` has the same memory layout as `str`.
+                    // For example, this is safe when `$custom_str` is defined as
+                    // `#[repr(transparent)] struct $custom_str(str);`.
+                    // The caller of this macro is responsible to satisfy this condition.
+                    Rc::<$custom_str>::from_raw(
+                        Rc::<str>::into_raw(inner_boxed) as *const $custom_str
+                    )
+                }
+            }
+        }
+
+        #[cfg(feature = "alloc")]
+        impl From<&$custom_str> for $crate::alloc::sync::Arc<$custom_str> {
+            fn from(s: &$custom_str) -> Self {
+                use $crate::alloc::sync::Arc;
+
+                let inner = s.as_str();
+                let inner_boxed = Arc::<str>::from(inner);
+                unsafe {
+                    // This is safe when `$custom_str` has the same memory layout as `str`.
+                    // For example, this is safe when `$custom_str` is defined as
+                    // `#[repr(transparent)] struct $custom_str(str);`.
+                    // The caller of this macro is responsible to satisfy this condition.
+                    Arc::<$custom_str>::from_raw(
+                        Arc::<str>::into_raw(inner_boxed) as *const $custom_str
+                    )
+                }
+            }
+        }
     };
 }
