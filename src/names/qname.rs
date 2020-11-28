@@ -460,13 +460,13 @@ impl<'a> ParsedQname<'a> {
     /// let name = ParsedQname::from_str("hello")?;
     /// assert_eq!(name, "hello");
     ///
-    /// let s: &Qname = name.as_qname_str();
+    /// let s: &Qname = name.as_qname();
     /// assert_eq!(s, "hello");
     /// # Ok::<_, xml_string::names::NameError>(())
     /// ```
     #[inline]
     #[must_use]
-    pub fn as_qname_str(&self) -> &'a Qname {
+    pub fn as_qname(&self) -> &'a Qname {
         self.content
     }
 
@@ -826,11 +826,11 @@ mod tests {
     #[test]
     fn qname_ref_from_str() {
         assert_eq!(
-            ParsedQname::from_str("hello").map(|v| v.as_qname_str()),
+            ParsedQname::from_str("hello").map(|v| v.as_qname()),
             Ok(qname("hello"))
         );
         assert_eq!(
-            ParsedQname::from_str("foo:bar").map(|v| v.as_qname_str()),
+            ParsedQname::from_str("foo:bar").map(|v| v.as_qname()),
             Ok(qname("foo:bar"))
         );
 
