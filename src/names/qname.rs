@@ -764,7 +764,7 @@ mod tests {
         Qname::from_str(s).unwrap_or_else(|e| panic!("Failed to cerate Qname from {:?}: {}", s, e))
     }
 
-    fn qname_ref(s: &str) -> ParsedQname<'_> {
+    fn parsed_qname(s: &str) -> ParsedQname<'_> {
         ParsedQname::from_str(s)
             .unwrap_or_else(|e| panic!("Failed to cerate ParsedQname from {:?}: {}", s, e))
     }
@@ -824,7 +824,7 @@ mod tests {
     }
 
     #[test]
-    fn qname_ref_from_str() {
+    fn parsed_qname_from_str() {
         assert_eq!(
             ParsedQname::from_str("hello").map(|v| v.as_qname()),
             Ok(qname("hello"))
@@ -841,25 +841,25 @@ mod tests {
     }
 
     #[test]
-    fn qname_ref_prefix() {
-        assert_eq!(qname_ref("hello").prefix(), None);
-        assert_eq!(qname_ref("foo:bar").prefix(), Some(ncname("foo")));
+    fn parsed_qname_prefix() {
+        assert_eq!(parsed_qname("hello").prefix(), None);
+        assert_eq!(parsed_qname("foo:bar").prefix(), Some(ncname("foo")));
     }
 
     #[test]
-    fn qname_ref_local_part() {
-        assert_eq!(qname_ref("hello").local_part(), ncname("hello"));
-        assert_eq!(qname_ref("foo:bar").local_part(), ncname("bar"));
+    fn parsed_qname_local_part() {
+        assert_eq!(parsed_qname("hello").local_part(), ncname("hello"));
+        assert_eq!(parsed_qname("foo:bar").local_part(), ncname("bar"));
     }
 
     #[test]
-    fn qname_ref_prefix_and_local() {
+    fn parsed_qname_prefix_and_local() {
         assert_eq!(
-            qname_ref("hello").prefix_and_local(),
+            parsed_qname("hello").prefix_and_local(),
             (None, ncname("hello"))
         );
         assert_eq!(
-            qname_ref("foo:bar").prefix_and_local(),
+            parsed_qname("foo:bar").prefix_and_local(),
             (Some(ncname("foo")), ncname("bar"))
         );
     }
