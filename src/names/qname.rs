@@ -757,16 +757,16 @@ mod tests {
 
     fn ncname(s: &str) -> &Ncname {
         Ncname::from_str(s)
-            .unwrap_or_else(|e| panic!("Failed to cerate Ncname from {:?}: {}", s, e))
+            .unwrap_or_else(|e| panic!("Failed to create Ncname from {:?}: {}", s, e))
     }
 
     fn qname(s: &str) -> &Qname {
-        Qname::from_str(s).unwrap_or_else(|e| panic!("Failed to cerate Qname from {:?}: {}", s, e))
+        Qname::from_str(s).unwrap_or_else(|e| panic!("Failed to create Qname from {:?}: {}", s, e))
     }
 
     fn parsed_qname(s: &str) -> ParsedQname<'_> {
         ParsedQname::from_str(s)
-            .unwrap_or_else(|e| panic!("Failed to cerate ParsedQname from {:?}: {}", s, e))
+            .unwrap_or_else(|e| panic!("Failed to create ParsedQname from {:?}: {}", s, e))
     }
 
     fn ensure_eq(s: &str) {
