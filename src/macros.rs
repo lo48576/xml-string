@@ -50,15 +50,15 @@ macro_rules! impl_traits_for_custom_string_slice {
         impl_cmp_symmetric!(&'_ $custom_str, str);
 
         #[cfg(feature = "alloc")]
-        impl_cmp_symmetric!($custom_str, $crate::alloc::string::String);
+        impl_cmp_symmetric!($custom_str, alloc::string::String);
         #[cfg(feature = "alloc")]
-        impl_cmp_symmetric!($custom_str, &$crate::alloc::string::String);
+        impl_cmp_symmetric!($custom_str, &alloc::string::String);
         #[cfg(feature = "alloc")]
-        impl_cmp_symmetric!($custom_str, $crate::alloc::boxed::Box<str>);
+        impl_cmp_symmetric!($custom_str, alloc::boxed::Box<str>);
         #[cfg(feature = "alloc")]
-        impl_cmp_symmetric!($crate::alloc::boxed::Box<$custom_str>, str);
+        impl_cmp_symmetric!(alloc::boxed::Box<$custom_str>, str);
         #[cfg(feature = "alloc")]
-        impl_cmp_symmetric!($custom_str, $crate::alloc::borrow::Cow<'_, str>);
+        impl_cmp_symmetric!($custom_str, alloc::borrow::Cow<'_, str>);
 
         impl AsRef<str> for $custom_str {
             #[inline]
@@ -68,7 +68,7 @@ macro_rules! impl_traits_for_custom_string_slice {
         }
 
         #[cfg(feature = "alloc")]
-        impl AsRef<str> for $crate::alloc::boxed::Box<$custom_str> {
+        impl AsRef<str> for alloc::boxed::Box<$custom_str> {
             #[inline]
             fn as_ref(&self) -> &str {
                 &(**self).0
@@ -97,9 +97,9 @@ macro_rules! impl_traits_for_custom_string_slice {
         }
 
         #[cfg(feature = "alloc")]
-        impl From<&$custom_str> for $crate::alloc::boxed::Box<$custom_str> {
+        impl From<&$custom_str> for alloc::boxed::Box<$custom_str> {
             fn from(s: &$custom_str) -> Self {
-                use $crate::alloc::boxed::Box;
+                use alloc::boxed::Box;
 
                 let inner = s.as_str();
                 let inner_boxed = Box::<str>::from(inner);
@@ -116,9 +116,9 @@ macro_rules! impl_traits_for_custom_string_slice {
         }
 
         #[cfg(feature = "alloc")]
-        impl From<&$custom_str> for $crate::alloc::rc::Rc<$custom_str> {
+        impl From<&$custom_str> for alloc::rc::Rc<$custom_str> {
             fn from(s: &$custom_str) -> Self {
-                use $crate::alloc::rc::Rc;
+                use alloc::rc::Rc;
 
                 let inner = s.as_str();
                 let inner_boxed = Rc::<str>::from(inner);
@@ -135,9 +135,9 @@ macro_rules! impl_traits_for_custom_string_slice {
         }
 
         #[cfg(feature = "alloc")]
-        impl From<&$custom_str> for $crate::alloc::sync::Arc<$custom_str> {
+        impl From<&$custom_str> for alloc::sync::Arc<$custom_str> {
             fn from(s: &$custom_str) -> Self {
-                use $crate::alloc::sync::Arc;
+                use alloc::sync::Arc;
 
                 let inner = s.as_str();
                 let inner_boxed = Arc::<str>::from(inner);
