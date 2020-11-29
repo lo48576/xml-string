@@ -36,6 +36,15 @@ macro_rules! impl_cmp_symmetric {
 /// The caller of this macro is responsible to satisfy this condition.
 macro_rules! impl_traits_for_custom_string_slice {
     ($custom_str:ty) => {
+        #[cfg(feature = "alloc")]
+        impl alloc::borrow::ToOwned for $custom_str {
+            type Owned = alloc::boxed::Box<$custom_str>;
+
+            fn to_owned(&self) -> Self::Owned {
+                From::from(self)
+            }
+        }
+
         impl_cmp_symmetric!($custom_str, str);
         impl_cmp_symmetric!($custom_str, &'_ str);
         impl_cmp_symmetric!(&'_ $custom_str, str);
