@@ -66,6 +66,13 @@ macro_rules! impl_traits_for_custom_string_slice {
             }
         }
 
+        impl AsRef<$custom_str> for $custom_str {
+            #[inline]
+            fn as_ref(&self) -> &$custom_str {
+                self
+            }
+        }
+
         impl core::fmt::Debug for &$custom_str {
             #[inline]
             fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
