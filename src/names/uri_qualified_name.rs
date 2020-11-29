@@ -129,11 +129,7 @@ impl UriQualifiedName {
     /// Returns `Err(Some((local_name_start, valid_up_to)))` if the string is invalid
     /// but has valid substring as the prefix.
     fn parse_as_possible(s: &str) -> Result<NonZeroUsize, Option<(NonZeroUsize, NonZeroUsize)>> {
-        if !s.starts_with("Q{") {
-            return Err(None);
-        }
-
-        let uri_and_rest = &s[2..];
+        let uri_and_rest = s.strip_prefix("Q{").ok_or(None)?;
         let uri_len = match uri_and_rest.find(|c| c == '{' || c == '}') {
             Some(pos) if uri_and_rest.as_bytes()[pos] == b'}' => pos,
             _ => return Err(None),
