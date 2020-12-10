@@ -40,7 +40,7 @@ impl UriQualifiedName {
     ///
     /// # Failures
     ///
-    /// Fails if the given string is not a valid [`UriQualifiedName`].
+    /// Fails if the given string is not a valid [`URIQualifiedName`].
     ///
     /// # Examples
     ///
@@ -91,7 +91,7 @@ impl UriQualifiedName {
     ///
     /// # Safety
     ///
-    /// The given string should be a valid [`UriQualifiedName`].
+    /// The given string should be a valid [`URIQualifiedName`].
     ///
     /// # Examples
     ///
@@ -687,14 +687,14 @@ mod tests {
     }
 
     #[test]
-    fn qname_str_valid() {
+    fn uqname_str_valid() {
         ensure_eq("Q{}local");
         ensure_eq("Q{foo}bar");
         ensure_eq("Q{http://example.com/}local");
     }
 
     #[test]
-    fn qname_str_invalid() {
+    fn uqname_str_invalid() {
         ensure_error_at("", 0);
         ensure_error_at("Q", 0);
         ensure_error_at("Q{", 0);
