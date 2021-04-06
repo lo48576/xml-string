@@ -7,7 +7,7 @@ use core::fmt;
 use core::num::NonZeroUsize;
 
 use crate::names::error::{NameError, TargetNameType};
-use crate::names::Ncname;
+use crate::names::{Eqname, Ncname};
 
 /// String slice for [`URIQualifiedName`].
 ///
@@ -128,7 +128,9 @@ impl UriQualifiedName {
     /// Returns `Err(None)` if the string is completely invalid.
     /// Returns `Err(Some((local_name_start, valid_up_to)))` if the string is invalid
     /// but has valid substring as the prefix.
-    fn parse_as_possible(s: &str) -> Result<NonZeroUsize, Option<(NonZeroUsize, NonZeroUsize)>> {
+    pub(super) fn parse_as_possible(
+        s: &str,
+    ) -> Result<NonZeroUsize, Option<(NonZeroUsize, NonZeroUsize)>> {
         let uri_and_rest = s.strip_prefix("Q{").ok_or(None)?;
         let uri_len = match uri_and_rest.find(|c| c == '{' || c == '}') {
             Some(pos) if uri_and_rest.as_bytes()[pos] == b'}' => pos,
@@ -307,6 +309,21 @@ impl UriQualifiedName {
 
 impl_traits_for_custom_string_slice!(UriQualifiedName);
 
+impl AsRef<Eqname> for UriQualifiedName {
+    #[inline]
+    fn as_ref(&self) -> &Eqname {
+        unsafe {
+            debug_assert!(
+                Eqname::from_str(self.as_str()).is_ok(),
+                "URIQualifiedName {:?} must be a valid Eqname",
+                self.as_str()
+            );
+            // This is safe because a URIQualifiedName is also a valid Eqname.
+            Eqname::new_unchecked(self.as_str())
+        }
+    }
+}
+
 impl<'a> From<ParsedUriQualifiedName<'a>> for &'a UriQualifiedName {
     #[inline]
     fn from(s: ParsedUriQualifiedName<'a>) -> Self {
@@ -346,7 +363,7 @@ impl<'a> ParsedUriQualifiedName<'a> {
     /// Panics if the `local_name_start` does not point to the start position of
     /// the local name.
     #[must_use]
-    fn new(content: &'a UriQualifiedName, local_name_start: NonZeroUsize) -> Self {
+    pub(super) fn new(content: &'a UriQualifiedName, local_name_start: NonZeroUsize) -> Self {
         if content.as_str().as_bytes()[local_name_start.get() - 1] != b'}' {
             panic!(
                 "`local_name_pos` (={:?}) should point to the next position
@@ -598,6 +615,13 @@ impl AsRef<UriQualifiedName> for ParsedUriQualifiedName<'_> {
     #[inline]
     fn as_ref(&self) -> &UriQualifiedName {
         self.content
+    }
+}
+
+impl AsRef<Eqname> for ParsedUriQualifiedName<'_> {
+    #[inline]
+    fn as_ref(&self) -> &Eqname {
+        self.content.as_ref()
     }
 }
 
