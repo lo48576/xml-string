@@ -2,6 +2,13 @@
 
 ## [Unreleased]
 
+* [`EQName`](https://www.w3.org/TR/2017/REC-xpath-31-20170321/#doc-xpath31-EQName)
+  support is added.
+
+### Added
+* [`EQName`](https://www.w3.org/TR/2017/REC-xpath-31-20170321/#doc-xpath31-EQName)
+  support is added.
+    + This would be useful for XPath processors.
 
 ## [0.0.1]
 
