@@ -70,6 +70,10 @@ impl std::error::Error for NameError {}
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[non_exhaustive]
 pub(super) enum TargetNameType {
+    /// [`Eqname`].
+    ///
+    /// [`EQName`]: https://www.w3.org/TR/2017/REC-xpath-31-20170321/#prod-xpath31-EQName
+    Eqname,
     /// [`Name`].
     ///
     /// [`Name`]: https://www.w3.org/TR/REC-xml/#NT-Name
@@ -97,6 +101,7 @@ impl TargetNameType {
     /// Returns the target name type name.
     fn name(self) -> &'static str {
         match self {
+            Self::Eqname => "EQName",
             Self::Name => "Name",
             Self::Ncname => "NCName",
             Self::Nmtoken => "Nmtoken",

@@ -7,7 +7,7 @@ use core::fmt;
 use core::num::NonZeroUsize;
 
 use crate::names::error::{NameError, TargetNameType};
-use crate::names::{Name, Ncname, Nmtoken};
+use crate::names::{Eqname, Name, Ncname, Nmtoken};
 
 /// String slice for [`QName`].
 ///
@@ -84,7 +84,9 @@ impl Qname {
     ///
     /// Retruns `Ok(colon_position)` if the string is valid QName.
     /// Returns `Err((colon_position, valid_up_to))` if the string is invalid.
-    fn parse_as_possible(s: &str) -> Result<Option<NonZeroUsize>, (Option<NonZeroUsize>, usize)> {
+    pub(super) fn parse_as_possible(
+        s: &str,
+    ) -> Result<Option<NonZeroUsize>, (Option<NonZeroUsize>, usize)> {
         // Parse the first component (prefix or full QName without prefix).
         let prefix_len = match Ncname::from_str(s) {
             Ok(_) => return Ok(None),
@@ -305,6 +307,21 @@ impl Qname {
 
 impl_traits_for_custom_string_slice!(Qname);
 
+impl AsRef<Eqname> for Qname {
+    #[inline]
+    fn as_ref(&self) -> &Eqname {
+        unsafe {
+            debug_assert!(
+                Eqname::from_str(self.as_str()).is_ok(),
+                "QName {:?} must be a valid Eqname",
+                self.as_str()
+            );
+            // This is safe because a QName is also a valid Eqname.
+            Eqname::new_unchecked(self.as_str())
+        }
+    }
+}
+
 impl AsRef<Name> for Qname {
     #[inline]
     fn as_ref(&self) -> &Name {
@@ -401,7 +418,7 @@ impl<'a> ParsedQname<'a> {
     ///
     /// Panics if the `prefix_len` does not point to the colon in the `content`.
     #[must_use]
-    fn new(content: &'a Qname, prefix_len: Option<NonZeroUsize>) -> Self {
+    pub(super) fn new(content: &'a Qname, prefix_len: Option<NonZeroUsize>) -> Self {
         if let Some(p_len) = prefix_len {
             if content.as_str().as_bytes()[p_len.get()] != b':' {
                 panic!(
@@ -701,6 +718,13 @@ impl AsRef<Qname> for ParsedQname<'_> {
     #[inline]
     fn as_ref(&self) -> &Qname {
         self.content
+    }
+}
+
+impl AsRef<Eqname> for ParsedQname<'_> {
+    #[inline]
+    fn as_ref(&self) -> &Eqname {
+        self.content.as_ref()
     }
 }
 
