@@ -735,10 +735,6 @@ mod tests {
             ParsedUriQualifiedName::from_str("Q{foo}bar").map(|v| v.as_uri_qualified_name()),
             Ok(uqn("Q{foo}bar"))
         );
-        assert_eq!(
-            ParsedUriQualifiedName::from_str("Q{foo}bar").map(|v| v.as_uri_qualified_name()),
-            Ok(uqn("Q{foo}bar"))
-        );
 
         assert_eq!(
             ParsedUriQualifiedName::from_str("Q{foo}:bar"),
