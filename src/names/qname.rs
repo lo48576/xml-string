@@ -314,7 +314,7 @@ impl AsRef<Name> for Qname {
                 "QName {:?} must be a valid Name",
                 self.as_str()
             );
-            // This is safe because a QName is also a valid NCName.
+            // This is safe because a QName is also a valid Name.
             Name::new_unchecked(self.as_str())
         }
     }
