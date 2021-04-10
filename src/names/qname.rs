@@ -16,6 +16,7 @@ use crate::names::{Eqname, Name, Ncname, Nmtoken};
 #[repr(transparent)]
 pub struct Qname(str);
 
+#[allow(clippy::len_without_is_empty)]
 impl Qname {
     /// Creates a new `&Qname`.
     ///
@@ -133,6 +134,22 @@ impl Qname {
     #[must_use]
     pub fn as_str(&self) -> &str {
         &self.0
+    }
+
+    /// Returns the length of the string in bytes.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use xml_string::names::Qname;
+    /// let name = Qname::from_str("foo:bar")?;
+    /// assert_eq!(name.len(), 7);
+    /// # Ok::<_, xml_string::names::NameError>(())
+    /// ```
+    #[inline]
+    #[must_use]
+    pub fn len(&self) -> usize {
+        self.0.len()
     }
 
     /// Parses the leading `Qname` and returns the value and the rest input.
@@ -411,6 +428,7 @@ pub struct ParsedQname<'a> {
     prefix_len: Option<NonZeroUsize>,
 }
 
+#[allow(clippy::len_without_is_empty)]
 impl<'a> ParsedQname<'a> {
     /// Creates a new `ParsedQname`.
     ///
@@ -504,6 +522,22 @@ impl<'a> ParsedQname<'a> {
     #[must_use]
     pub fn as_str(&self) -> &'a str {
         self.content.as_str()
+    }
+
+    /// Returns the length of the string in bytes.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use xml_string::names::ParsedQname;
+    /// let name = ParsedQname::from_str("foo:bar")?;
+    /// assert_eq!(name.len(), 7);
+    /// # Ok::<_, xml_string::names::NameError>(())
+    /// ```
+    #[inline]
+    #[must_use]
+    pub fn len(&self) -> usize {
+        self.content.len()
     }
 
     /// Returns whether the QName has a prefix.
