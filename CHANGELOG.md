@@ -4,11 +4,15 @@
 
 * [`EQName`](https://www.w3.org/TR/2017/REC-xpath-31-20170321/#doc-xpath31-EQName)
   support is added.
+* `len` methods are added to string types.
 
 ### Added
 * [`EQName`](https://www.w3.org/TR/2017/REC-xpath-31-20170321/#doc-xpath31-EQName)
   support is added.
     + This would be useful for XPath processors.
+* `len` methods are added to string types.
+    * `is_empty()` is not added since they are obviously non-empty string.
+      Users should be aware they will never be empty, before checking if they are empty.
 
 ## [0.0.1]
 
