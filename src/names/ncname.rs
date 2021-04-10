@@ -15,6 +15,7 @@ use crate::names::{Eqname, Name, Nmtoken, Qname};
 #[repr(transparent)]
 pub struct Ncname(str);
 
+#[allow(clippy::len_without_is_empty)]
 impl Ncname {
     /// Creates a new `&Ncname`.
     ///
@@ -104,6 +105,22 @@ impl Ncname {
     #[must_use]
     pub fn as_str(&self) -> &str {
         &self.0
+    }
+
+    /// Returns the length of the string in bytes.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use xml_string::names::Ncname;
+    /// let name = Ncname::from_str("foo")?;
+    /// assert_eq!(name.len(), 3);
+    /// # Ok::<_, xml_string::names::NameError>(())
+    /// ```
+    #[inline]
+    #[must_use]
+    pub fn len(&self) -> usize {
+        self.0.len()
     }
 
     /// Parses the leading `Ncname` and returns the value and the rest input.

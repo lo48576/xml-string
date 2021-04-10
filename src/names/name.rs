@@ -15,6 +15,7 @@ use crate::names::{Ncname, Nmtoken, Qname};
 #[repr(transparent)]
 pub struct Name(str);
 
+#[allow(clippy::len_without_is_empty)]
 impl Name {
     /// Creates a new `&Name`.
     ///
@@ -99,6 +100,22 @@ impl Name {
     #[must_use]
     pub fn as_str(&self) -> &str {
         &self.0
+    }
+
+    /// Returns the length of the string in bytes.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use xml_string::names::Name;
+    /// let name = Name::from_str("foo:bar")?;
+    /// assert_eq!(name.len(), 7);
+    /// # Ok::<_, xml_string::names::NameError>(())
+    /// ```
+    #[inline]
+    #[must_use]
+    pub fn len(&self) -> usize {
+        self.0.len()
     }
 
     /// Parses the leading `Name` and returns the value and the rest input.

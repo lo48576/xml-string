@@ -15,6 +15,7 @@ use crate::names::{Name, Ncname, Qname};
 #[repr(transparent)]
 pub struct Nmtoken(str);
 
+#[allow(clippy::len_without_is_empty)]
 impl Nmtoken {
     /// Creates a new `&Nmtoken`.
     ///
@@ -95,6 +96,22 @@ impl Nmtoken {
     #[must_use]
     pub fn as_str(&self) -> &str {
         &self.0
+    }
+
+    /// Returns the length of the string in bytes.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use xml_string::names::Nmtoken;
+    /// let s = Nmtoken::from_str("foo")?;
+    /// assert_eq!(s.len(), 3);
+    /// # Ok::<_, xml_string::names::NameError>(())
+    /// ```
+    #[inline]
+    #[must_use]
+    pub fn len(&self) -> usize {
+        self.0.len()
     }
 
     /// Parses the leading `Nmtoken` and returns the value and the rest input.

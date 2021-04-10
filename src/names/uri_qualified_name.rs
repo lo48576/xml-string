@@ -17,6 +17,7 @@ use crate::names::{Eqname, Ncname};
 #[repr(transparent)]
 pub struct UriQualifiedName(str);
 
+#[allow(clippy::len_without_is_empty)]
 impl UriQualifiedName {
     /// Creates a new `&UriQualifiedName`.
     ///
@@ -167,6 +168,22 @@ impl UriQualifiedName {
     #[must_use]
     pub fn as_str(&self) -> &str {
         &self.0
+    }
+
+    /// Returns the length of the string in bytes.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use xml_string::names::UriQualifiedName;
+    /// let name = UriQualifiedName::from_str("Q{foo}bar")?;
+    /// assert_eq!(name.len(), "Q{foo}bar".len());
+    /// # Ok::<_, xml_string::names::NameError>(())
+    /// ```
+    #[inline]
+    #[must_use]
+    pub fn len(&self) -> usize {
+        self.0.len()
     }
 
     /// Parses the leading `UriQualifiedName` and returns the value and the rest input.
@@ -355,6 +372,7 @@ pub struct ParsedUriQualifiedName<'a> {
     local_name_start: NonZeroUsize,
 }
 
+#[allow(clippy::len_without_is_empty)]
 impl<'a> ParsedUriQualifiedName<'a> {
     /// Creates a new `ParsedUriQualifiedName`.
     ///
@@ -464,6 +482,22 @@ impl<'a> ParsedUriQualifiedName<'a> {
     #[must_use]
     pub fn as_str(&self) -> &'a str {
         self.content.as_str()
+    }
+
+    /// Returns the length of the string in bytes.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use xml_string::names::ParsedUriQualifiedName;
+    /// let name = ParsedUriQualifiedName::from_str("Q{foo}bar")?;
+    /// assert_eq!(name.len(), "Q{foo}bar".len());
+    /// # Ok::<_, xml_string::names::NameError>(())
+    /// ```
+    #[inline]
+    #[must_use]
+    pub fn len(&self) -> usize {
+        self.content.len()
     }
 
     /// Returns the URI.

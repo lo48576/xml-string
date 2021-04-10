@@ -70,6 +70,7 @@ pub enum EqnameNamespace<'a> {
 #[repr(transparent)]
 pub struct Eqname(str);
 
+#[allow(clippy::len_without_is_empty)]
 impl Eqname {
     /// Creates a new `&UriQualifiedName`.
     ///
@@ -213,6 +214,25 @@ impl Eqname {
     #[must_use]
     pub fn as_str(&self) -> &str {
         &self.0
+    }
+
+    /// Returns the length of the string in bytes.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use xml_string::names::Eqname;
+    /// let q = Eqname::from_str("foo:bar")?;
+    /// assert_eq!(q.len(), "foo:bar".len());
+    ///
+    /// let uri_qualified = Eqname::from_str("Q{foo}bar")?;
+    /// assert_eq!(uri_qualified.len(), "Q{foo}bar".len());
+    /// # Ok::<_, xml_string::names::NameError>(())
+    /// ```
+    #[inline]
+    #[must_use]
+    pub fn len(&self) -> usize {
+        self.0.len()
     }
 
     /// Returns the name in the type specific to the variant
