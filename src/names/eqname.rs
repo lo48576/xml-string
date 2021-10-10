@@ -854,7 +854,7 @@ impl PartialOrd for ParsedEqname<'_> {
 
 impl Ord for ParsedEqname<'_> {
     fn cmp(&self, other: &Self) -> cmp::Ordering {
-        self.as_str().cmp(&other.as_str())
+        self.as_str().cmp(other.as_str())
     }
 }
 
